@@ -6,7 +6,7 @@ Author: Russ Hyde
 Maintainer: Russ Hyde <yourself@somewhere.net>
 Description: Provides some helper functions and pipelines for working
   with microarray data and GEO / ArrayExpress datasets.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
