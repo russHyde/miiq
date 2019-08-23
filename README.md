@@ -5,6 +5,10 @@
 
 <!-- badges: start -->
 
+[![Travis build
+status](https://travis-ci.org/russHyde/miiq.svg?branch=master)](https://travis-ci.org/russHyde/miiq)
+[![Codecov test
+coverage](https://codecov.io/gh/russHyde/miiq/branch/master/graph/badge.svg)](https://codecov.io/gh/russHyde/miiq?branch=master)
 <!-- badges: end -->
 
 The goal of miiq is to …

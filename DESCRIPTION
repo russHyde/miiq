@@ -1,6 +1,6 @@
 Package: miiq
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Microarrays Are Awesome: Get Them Analysed HERE!
 Version: 0.1.0
 Author: Russ Hyde
 Maintainer: Russ Hyde <yourself@somewhere.net>
@@ -12,3 +12,6 @@ LazyData: true
 RoxygenNote: 6.1.1
 URL: https://github.com/russHyde/miiq
 BugReports: https://github.com/russHyde/miiq/issues
+Suggests: 
+    testthat,
+    covr
