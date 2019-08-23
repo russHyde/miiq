@@ -12,6 +12,11 @@ LazyData: true
 RoxygenNote: 6.1.1
 URL: https://github.com/russHyde/miiq
 BugReports: https://github.com/russHyde/miiq/issues
-Suggests: 
+Suggests:
     testthat,
     covr
+Imports:
+    Biobase,
+    limma,
+    methods,
+    magrittr
