@@ -22,11 +22,11 @@ NULL
 
   # Check that the number of probes is consistent between eset, fits and
   #   fits.init
-  check_probes <- function(L) {
+  check_probes <- function(x) {
     non_empty_nrows <- unlist(
       Map(
         nrow,
-        Filter(function(x) nrow(x) > 0, L)
+        Filter(function(x) nrow(x) > 0, x)
       )
     )
 
