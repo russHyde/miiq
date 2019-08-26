@@ -149,3 +149,47 @@ get_refseq_column <- function(
   stopifnot(length(refseq_cols) >= 1)
   refseq_cols[1]
 }
+
+###############################################################################
+
+#' Extract any NM_XXXX or NR_XXXX RefSeq/GenBank identifiers out of a SwissProt
+#' column in an \code{ExpressionSet}
+#'
+#' Cells are delimited as follows: ABC /// DEF /// GHI1 // GHI2 /// JKL
+#' So that main entries are ///-separated and subentries are //-separated.
+#'
+#' Returned value should be a vector of comma-separated refseq ids.
+#'
+#' @param        swiss        A vector of swissprot ids.
+#'
+#' @importFrom   magrittr      %>%
+#'
+
+swissprot_column_to_refseq <- function(swiss) {
+  # TODO: decide if BC039241 - type ids should be kept as well
+  if (is.null(swiss) ||
+    length(swiss) == 0
+  ) {
+    stop("NULL input to swissprot_column_to_refseq")
+  }
+
+  grepval_refseq <- function(v) {
+    gsub(
+      pattern = "\\.[0-9]+$",
+      replacement = "",
+      x = grep("NR_|NM_", v, value = TRUE)
+    )
+  }
+
+  # make a list of vectors of SwissProt IDs from the input vector
+  list_of_swiss_ids <- gsub(
+    pattern = " /// | // ", replacement = ",", x = swiss
+  ) %>%
+    strsplit(split = ",")
+
+  # then collapse each vector into a deduplicated, comma-separated, string
+  # and return a vector of comma-separated strings
+  Map(grepval_refseq, list_of_swiss_ids) %>%
+    lapply(function(x) paste(unique(x), collapse = ",")) %>%
+    unlist()
+}

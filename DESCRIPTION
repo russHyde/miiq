@@ -19,7 +19,8 @@ Imports:
     Biobase,
     limma,
     methods,
-    moments
+    moments,
+    magrittr
 Collate:
     'microarray_classes.R'
     'vector_manipulation.R'
