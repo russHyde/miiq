@@ -170,21 +170,21 @@ test_that("has_refseq_column", {
   expect_equal(
     has_refseq_column(eset_empty),
     FALSE,
-    info = "an empty Eset should have no RefSeq column"
+    info = "an empty `Eset` should have no RefSeq column"
   )
 
   # ESet that has no GenBank / RefSeq column:
   expect_equal(
     has_refseq_column(eset_no_genbank),
     FALSE,
-    info = "an Eset that has no RefSeq column"
+    info = "an `Eset` that has no RefSeq column"
   )
 
   # ESet that has a Refseq column
   expect_equal(
     has_refseq_column(eset_refseq),
     TRUE,
-    info = "an Eset that has a Refseq column"
+    info = "an `Eset` that has a Refseq column"
   )
 })
 

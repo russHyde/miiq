@@ -69,3 +69,83 @@ check_if_pretransformed_eset <- function(
 
   return(!untransformed)
 }
+
+###############################################################################
+
+#' Not exported: checks if a valid refseq column is present in an
+#'   \code{ExpressionSet} and returns a vector of all refseq column names if it
+#'   does; otherwise returns an empty vector
+#'
+#' @param        gset          An \code{ExpressionSet}.
+#' @param        refseq_col_types   The choice of refseq column names.
+#'
+#' @importClassesFrom   Biobase   ExpressionSet
+#' @importFrom   Biobase       varLabels   featureData
+#'
+get_refseq_colnames <- function(
+                                gset = NULL,
+                                refseq_col_types = c(
+                                  "RefSeq Transcript ID",
+                                  # in case make.names has been applied:
+                                  "RefSeq.Transcript.ID",
+                                  "GB_LIST",
+                                  "GB_ACC"
+                                )) {
+  # returns the names of the RefSeq columns in the gset if any exist
+  # and returns an empty character vector otherwise
+  stopifnot(!is.null(gset) && is(gset, "ExpressionSet"))
+
+  refseq_cols <- intersect(
+    refseq_col_types,
+    Biobase::varLabels(Biobase::featureData(gset))
+  )
+
+  if (length(refseq_cols) > 0) {
+    return(refseq_cols)
+  } else {
+    return(character(0))
+  }
+}
+
+#' Not exported: checks if an ExpressionSet has a valid RefSeq column
+#'
+#' @inheritParams   get_refseq_colnames
+#'
+has_refseq_column <- function(
+                              gset = NULL) {
+  # Returns TRUE/FALSE depedning whether a RefSeq-esque column is present in
+  #   the input gset
+  refseq_cols <- get_refseq_colnames(gset = gset)
+  length(refseq_cols) > 0
+}
+
+#' Returns a RefSeq-annotation-containing column name from an
+#' \code{ExpressionSet}
+#'
+#' Extracts a single column name from an \code{ExpressionSet}. The
+#' corresponding annotation column contains RefSeq IDs for the rows of that
+#' \code{ExpressionSet}. Where multiple Refseq columns are present, only the
+#' first is returned (order specified by \code{get_refseq_colnames}).
+#'
+#' Errors are thrown if no RefSeq column is present or if the RefSeq column
+#' contains neither character nor factor variables.
+#'
+#' @inheritParams   get_refseq_colnames
+#'
+#' @return       A single string - the name of an annotation column that
+#'   contains RefSeq data inside the \code{ExpressionSet}.
+#'
+#' @importFrom   Biobase       featureData
+#' @export
+#'
+
+get_refseq_column <- function(
+                              gset = NULL) {
+  refseq_cols <- get_refseq_colnames(gset = gset)
+  for (rc in refseq_cols) {
+    fd <- Biobase::featureData(gset)[[rc]]
+    stopifnot(is.character(fd) || is.factor(fd))
+  }
+  stopifnot(length(refseq_cols) >= 1)
+  refseq_cols[1]
+}
