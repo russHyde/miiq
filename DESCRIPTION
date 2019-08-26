@@ -21,8 +21,10 @@ Imports:
     methods,
     moments,
     magrittr,
-    preprocessCore
+    preprocessCore,
+    stringr
 Collate:
+    'id_mapping.R'
     'microarray_classes.R'
     'vector_manipulation.R'
     'microarray_functions.R'

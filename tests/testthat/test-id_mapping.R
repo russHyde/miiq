@@ -1,0 +1,433 @@
+###############################################################################
+
+context("Tests mappings to/from Database-specific Ids")
+
+# library("org.Hs.eg.db")
+
+###############################################################################
+
+# #' Can"t work out how best to import a package that is only used within the
+# #'   testing suite
+# #'
+# #' @import       org.Hs.eg.db
+# symbol_fn <- function(x) symbol_to_entrez_id(
+#     gene_symbols = x,
+#     symbol_type = "SYMBOL",
+#     entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
+#   )
+
+# #' @import       org.Hs.eg.db
+# genbank_fn <- function(x) symbol_to_entrez_id(
+#     gene_symbols = x,
+#     symbol_type = "REFSEQ",
+#     entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
+#   )
+
+# #' @import       org.Hs.eg.db
+# ensembl_fn <- function(x) symbol_to_entrez_id(
+#     gene_symbols = x,
+#     symbol_type = "ENSEMBL",
+#     entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
+#   )
+# optim.flag <- 1 # used for multisymbol_to_entrez_id
+
+# ###############################################################################
+
+### ======================================================================= ###
+#   Non-gene databases
+### ======================================================================= ###
+
+test_that("geo_id_to_accession: Conversion of GEO identifiers", {
+  # GSE, GDS, GSM, GPL
+
+  expect_error(
+    object = geo_id_to_accession(),
+    info = "No input to geo_id_to_accession"
+  )
+  expect_equal(
+    object = geo_id_to_accession(character(0)),
+    expected = character(0),
+    info = "Empty input to geo_id_to_accession"
+  )
+  expect_equal(
+    object = geo_id_to_accession(NULL),
+    expected = character(0),
+    info = "NULL input to geo_id_to_accession"
+  )
+  expect_equal(
+    object = geo_id_to_accession("200008833"),
+    expected = "GSE8833",
+    info = "Single string-input to geo_id_to_accession"
+  )
+  expect_equal(
+    object = geo_id_to_accession(200001234),
+    expected = "GSE1234",
+    info = "Single numeric-input to geo_id_to_accession"
+  )
+  expect_equal(
+    object = geo_id_to_accession("NOT_A_NUM"),
+    expected = as.character(NA),
+    info = "Strings that aren't representations of numbers should return NA"
+  )
+  expect_equal(
+    object = geo_id_to_accession("999888777"),
+    expected = as.character(NA),
+    info = "9-mer numeric ids should start with 1, 2, or 3"
+  )
+  expect_equal(
+    object = geo_id_to_accession(c("1222333444", "0122233344")),
+    expected = as.character(c(NA, NA)),
+    info = "Number strings must be exactly 9-long and start with 1, 2, or 3"
+  )
+  expect_equal(
+    object = geo_id_to_accession(
+      c(
+        "200008833", "200014671", "100000570", "302450495", "1962", "4278",
+        "NOT_A_NUMBER_STRING", "LENGTH_9_"
+      )
+    ),
+    expected = c(
+      "GSE8833", "GSE14671", "GPL570", "GSM2450495", NA, NA, NA,
+      NA
+    ),
+    info = paste(
+      "Various string inputs to geo_id_to_accession; valid GSE/GPL/GSM are",
+      "mapped to accession numbers; valid GDS ids are not mapped to accession",
+      "numbers; incorrectly formatted input is mapped to NA"
+    )
+  )
+})
+
+###############################################################################
+
+# ### ======================================================================= ###
+# #   Gene-identifier databases
+# ### ======================================================================= ###
+
+# test_that("Mappings from SYMBOL to Entrez ids", {
+#   expect_equal(
+#     object = symbol_fn(c()),
+#     expected = c(),
+#     info = "Empty vector input"
+#   )
+#   expect_equal(
+#     object = symbol_fn(NULL),
+#     expected = c(),
+#     info = "NULL input"
+#   )
+#   expect_equal(
+#     object = symbol_fn(""),
+#     expected = as.character(NA),
+#     info = "Empty string input"
+#   )
+#   expect_equal(
+#     object = symbol_fn("AKT3"),
+#     expected = "10000",
+#     info = "Single, mappable, symbol"
+#   )
+#   expect_equal(
+#     object = symbol_fn(c("AKT3", "CCR5", "SLC38A2")),
+#     expected = c("10000", "1234", "54407"),
+#     info = "Multiple, mappable, symbols"
+#   )
+#   expect_equal(
+#     object = symbol_fn(c("CCR5", "AKT3", "SLC38A2")),
+#     expected = c("1234", "10000", "54407"),
+#     info = "Multiple, mappable, symbols - rearranged order"
+#   )
+#   expect_equal(
+#     object = symbol_fn("KTELC1"),
+#     expected = as.character(NA),
+#     info = "Single, unmappable, symbol"
+#   )
+#   expect_equal(
+#     object = symbol_fn(c("KTELC1", "AKT3")),
+#     expected = c(NA, "10000"),
+#     info = "Unmappable and mappable symbols together"
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Mappings from Genbank id to Entrez.id", {
+#   expect_equal(
+#     object = genbank_fn(c()),
+#     expected = c(),
+#     info = "Empty genbank input"
+#   )
+#   expect_equal(
+#     object = genbank_fn(NULL),
+#     expected = c(),
+#     info = "NULL genbank input"
+#   )
+#   expect_equal(
+#     object = genbank_fn(""),
+#     expected = as.character(NA),
+#     info = "Empty-string genbank input"
+#   )
+#   expect_equal(
+#     object = genbank_fn("NM_001206729"),
+#     expected = "10000",
+#     info = "Single valid genbank input"
+#   )
+#   expect_equal(
+#     object = genbank_fn(c("NM_001206729", "NM_005465")),
+#     expected = c("10000", "10000"),
+#     info = "Two valid genbank inputs, map to the same gene"
+#   )
+#   expect_equal(
+#     object = genbank_fn("NM_001206729.1"),
+#     expected = "10000",
+#     info = "Genbank input with NM_mainID.subID both present"
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Different specifications of EntrezGene database", {
+#   expect_error(
+#     object = symbol_to_entrez_id(
+#       gene_symbols = c("NM_001206729", "NM_005465"),
+#       symbol_type = "REFSEQ",
+#       entrezgene_db = "not.an.eg.db"
+#     ),
+#     info = "Invalid entrezgene database"
+#   )
+#   expect_equal(
+#     object = symbol_to_entrez_id(
+#       c("NM_001206729", "NM_005465"),
+#       symbol_type = "REFSEQ",
+#       entrezgene_db = "org.Hs.eg.db"
+#     ),
+#     expected = c("10000", "10000"),
+#     info = "Entrezgene DB passed as a string"
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Ensembl-Genes mapping to EntrezGene", {
+#   expect_equal(
+#     object = ensembl_fn("ENSG00000004866"),
+#     expected = "7982|93655",
+#     info = "Multiply-mapping input"
+#   )
+#   expect_equal(
+#     object = ensembl_fn(""),
+#     expected = as.character(NA),
+#     info = "Empty string Ensembl input"
+#   )
+#   expect_equal(
+#     object = ensembl_fn("ENSG00000067601"),
+#     expected = as.character(NA),
+#     info = paste0(
+#       "Processed psedogene: initially mapped to",
+#       " empty string instead of <NA>"
+#     )
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Testing multisymbol mapper: Symbols to Entrez", {
+
+#   # Tests using HGNC symbols as input
+#   lambda_fn <- function(x) {
+#     multisymbol_to_entrez_ids(
+#       gene_symbols = x,
+#       symbol_type = "SYMBOL",
+#       entrezgene_db = org.Hs.eg.db::org.Hs.eg.db,
+#       optim_flag = optim.flag
+#     )
+#   }
+
+#   expect_equal(
+#     object = lambda_fn(c()),
+#     expected = c(),
+#     info = "Multisymbol: Empty input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(NULL),
+#     expected = c(),
+#     info = "Multisymbol: NULL input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(""),
+#     expected = as.character(NA),
+#     info = "Multisymbol: Empty string"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("DOESNOTMAP"),
+#     expected = as.character(NA),
+#     info = "Multisymbol: Single non-mapping input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("AKT3"),
+#     expected = "10000",
+#     info = "Multisymbol: Singly-mapping input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(c("AKT3", "CCR5", "SLC38A2")),
+#     expected = c("10000", "1234", "54407"),
+#     info = "Multisymbol: Multiple singly-mapping inputs"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(c("AKT3|AKT3")),
+#     expected = "10000",
+#     info = "A single many:one mapping input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("AKT3|CCR5"),
+#     expected = "10000|1234",
+#     info = "Multisymbol: A single many:many input"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("AKT3|CCR5"),
+#     expected = lambda_fn("CCR5|AKT3"),
+#     info = "Lexicographic sorting of the output"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("AKT3||DOESNOTMAP"),
+#     expected = "10000",
+#     info = "Delimited string of multiple ids; only one valid map"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(c("AKT3|XK", "CCR5|SLC38A2")),
+#     expected = c("10000|7504", "1234|54407"),
+#     info = "Vector of multiply-mapping inputs"
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Testing multisymbol mapper: Ensembl to Entrez", {
+#   lambda_ensembl <- function(x) {
+#     multisymbol_to_entrez_ids(
+#       gene_symbols = x,
+#       symbol_type = "ENSEMBL",
+#       entrezgene_db = org.Hs.eg.db::org.Hs.eg.db,
+#       optim_flag = optim.flag
+#     )
+#   }
+
+#   expect_equal(
+#     object = lambda_ensembl("ENSG00000004866"),
+#     expected = c("7982|93655"),
+#     info = "Multiply-mapping single gene"
+#   )
+
+#   expect_equal(
+#     object = lambda_ensembl("ENSG00000004866|ENSG0000004866"),
+#     expected = c("7982|93655"),
+#     info = "Multiply-mapping duplicated gene"
+#   )
+# })
+
+# ###############################################################################
+
+# test_that("Testing multisymbol mapper: Genbank to Entrez", {
+#   lambda_fn_genbank <- function(x) {
+#     multisymbol_to_entrez_ids(
+#       gene_symbols = x,
+#       symbol_type = "REFSEQ",
+#       entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
+#     )
+#   }
+
+#   expect_equal(
+#     object = lambda_fn_genbank(c()),
+#     expected = c(),
+#     info = "Empty input(genbank)"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn_genbank(NULL),
+#     expected = c(),
+#     info = "NULL input(genbank)"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn_genbank(""),
+#     expected = as.character(NA),
+#     info = "Empty string input(genbank)"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn_genbank("DOESNOTMAP"),
+#     expected = as.character(NA),
+#     info = "Single non-mapping non-empty string(genbank)"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn_genbank("NM_001206729"),
+#     expected = "10000",
+#     info = "Singly-mapping input"
+#   )
+# })
+
+# ###############################################################################
+# test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
+#   lambda_fn <- function(x) {
+#     paste_gene_symbols(
+#       entrez_ids = x,
+#       entrezgene_db = "org.Hs.eg.db",
+#       collapse_character = "|"
+#     )
+#   }
+
+#   expect_error(
+#     object = paste_gene_symbols(),
+#     info = "No input to paste_gene_symbols - should fail"
+#   )
+
+#   expect_error(
+#     object = paste_gene_symbols(NULL),
+#     info = "NULL input to paste_gene_symbols - should fail"
+#   )
+
+#   expect_error(
+#     object = paste_gene_symbols(character(0)),
+#     info = "Empty vector input to paste_gene_symbols - should fail"
+#   )
+
+#   expect_error(
+#     object = paste_gene_symbols(
+#       entrez_ids = "1234",
+#       entrezgene_db = "NOT.A.DATABASE"
+#     ),
+#     info = "No AnnotationDbi input to paste_gene_symbols - should fail"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn("1234"),
+#     expected = c("1234|CCR5"),
+#     info = "Single, correctly mapping gene id"
+#   )
+
+#   expect_equal(
+#     object = lambda_fn(c("1234", "10000")),
+#     expected = c("1234|CCR5", "10000|AKT3"),
+#     info = "Two, correctly mapping gene ids"
+#   )
+
+#   # Note that 4663 used to be gene symbol "NA" = neuroacanthocytosis
+#   #   although this is now "7504|XK"
+#   # Also, note that default return from merge(., .) is as.character(NA)
+#   expect_equal(
+#     object = lambda_fn(c("4", "5", "6", "4663", "7504")),
+#     expected = c("4|---", "5|---", "6|---", "4663|---", "7504|XK"),
+#     info = "Some non-mapping gene ids - should return 'gene.id|---'"
+#   )
+# })
+
+# ###############################################################################
