@@ -18,7 +18,8 @@ Suggests:
 Imports:
     Biobase,
     limma,
-    methods
+    methods,
+    moments
 Collate:
     'microarray_classes.R'
     'vector_manipulation.R'
