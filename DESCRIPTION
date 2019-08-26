@@ -13,9 +13,16 @@ RoxygenNote: 6.1.1
 URL: https://github.com/russHyde/miiq
 BugReports: https://github.com/russHyde/miiq/issues
 Suggests:
-    testthat,
+    testthat (>= 2.1.0),
     covr
 Imports:
     Biobase,
     limma,
-    methods
+    methods,
+    moments,
+    magrittr,
+    preprocessCore
+Collate:
+    'microarray_classes.R'
+    'vector_manipulation.R'
+    'microarray_functions.R'

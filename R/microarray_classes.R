@@ -7,6 +7,8 @@
 #' @importFrom   methods       setGeneric
 #' @importFrom   methods       setMethod
 #' @importFrom   methods       setReplaceMethod
+#'
+
 NULL
 
 ###############################################################################
@@ -88,6 +90,7 @@ NULL
 #'
 #' @exportClass   eset_limma_dataset
 #'
+
 methods::setClass(
   "eset_limma_dataset",
   slots = list(
@@ -119,6 +122,7 @@ methods::setClass(
 #'
 #' @export
 #'
+
 eset_limma_dataset <- function(...) {
   methods::new("eset_limma_dataset", ...)
 }
@@ -136,6 +140,7 @@ eset_limma_dataset <- function(...) {
 #' @name         [
 #' @rdname       eset_limma_dataset
 #' @aliases      [,eset_limma_dataset,numeric,missing,missing-method
+#'
 
 methods::setMethod(
   "[",
@@ -219,6 +224,7 @@ methods::setMethod(
 #'
 #' @export
 #'
+
 gld_fnBuilder_keepSample <- function(
                                      # nolint start
                                      column.filter.fn
@@ -255,6 +261,7 @@ gld_fnBuilder_keepSample <- function(
 #'
 #' @export
 #'
+
 gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
   # keep all samples
   # crash if no samples exist
@@ -276,6 +283,7 @@ gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
 #'
 #' @export
 #'
+
 gld_fnDefault_keepProbe <- function(
                                     # nolint start
                                     geo.limma.dataset = NULL,
@@ -314,6 +322,7 @@ gld_fnDefault_keepProbe <- function(
 #'
 #' @export
 #'
+
 gld_fnBuilder_exptDesign <- function(
                                      treatment.cols = NULL,
                                      design.fn = NULL) {
@@ -376,6 +385,7 @@ gld_fnBuilder_exptDesign <- function(
 #'
 #' @export
 #'
+
 gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
   treatment.cols = "title",
   design.fn = function(treatments) {
