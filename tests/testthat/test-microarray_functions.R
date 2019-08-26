@@ -832,8 +832,8 @@ test_that("Unit tests for filter_and_transform_eset", {
   )
 
   # Convert Infs to NA during log-transformation
-  dnames_Inf <- list(1:3, 1:2)
-  eset_Inf <- new(
+  dnames_inf <- list(1:3, 1:2)
+  eset_inf <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -842,11 +842,11 @@ test_that("Unit tests for filter_and_transform_eset", {
         1 / 2, 4
       ),
       nrow = 3, ncol = 2, byrow = TRUE,
-      dimnames = dnames_Inf
+      dimnames = dnames_inf
     )
   )
 
-  expect_Inf_converted <- new(
+  expect_inf_converted <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -854,7 +854,7 @@ test_that("Unit tests for filter_and_transform_eset", {
         NA, 1,
         -1, 2
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_Inf
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_inf
     )
   )
 
@@ -866,24 +866,24 @@ test_that("Unit tests for filter_and_transform_eset", {
         -Inf, 1,
         -1, 2
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_Inf
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_inf
     )
   )
 
   expect_equal(
     ft_runner(
-      eset = eset_Inf,
+      eset = eset_inf,
       log2_transform = TRUE,
       convert_inf_to_na = TRUE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_Inf_converted,
+    expect_inf_converted,
     info = "Converting Infs to NA during log-transformation"
   )
 
   expect_equal(
     ft_runner(
-      eset = eset_Inf,
+      eset = eset_inf,
       log2_transform = TRUE,
       convert_inf_to_na = FALSE,
       drop_row_na_inf_threshold = 1
@@ -1018,7 +1018,7 @@ test_that("Unit tests for filter_and_transform_eset", {
 
   # Expected values on subtracting medians, dividng by IQRs and then
   #   transforming Infs to NA
-  expect_exprs_med_iqr_inf2NA <- matrix(
+  expect_exprs_med_iqr_inf_to_na <- matrix(
     c(
       -1, -1, NaN, -0.75,
       -0.5, 0, NaN, -0.25,
@@ -1036,7 +1036,7 @@ test_that("Unit tests for filter_and_transform_eset", {
       drop_row_na_inf_threshold = 1,
       normalise_method = "median_iqr"
     ),
-    new("ExpressionSet", exprs = expect_exprs_med_iqr_inf2NA),
+    new("ExpressionSet", exprs = expect_exprs_med_iqr_inf_to_na),
     info = "Median / IQR normalisation and Inf --> NA"
   )
 
