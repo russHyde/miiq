@@ -2,20 +2,18 @@
 
 context("Tests for the functions in rh_microarray_classes.R")
 
-library("Biobase")
-library("limma")
-
 ###############################################################################
 # Expression sets that are used multiple times:
-eset_empty <- ExpressionSet()
+eset_empty <- Biobase::ExpressionSet()
 
-eset_1x2 <- ExpressionSet(
+eset_1x2 <- Biobase::ExpressionSet(
   # 1 probe, 2 samples
   assayData = matrix(
-    1:2, nrow = 1,
+    1:2,
+    nrow = 1,
     dimnames = list("probe1", c("samp1", "samp2"))
   ),
-  phenoData = AnnotatedDataFrame(data.frame(
+  phenoData = Biobase::AnnotatedDataFrame(data.frame(
     title = c("A", "B"),
     row.names = c("samp1", "samp2")
   ))
@@ -73,16 +71,17 @@ test_that(".check_or_get_eset", {
 #     - MArrayLM (fits.init)
 #     - MArrayLM (fits)
 test_that("Validity of eset_limma_datasets (entries and dimensions)", {
-  xset <- new("ExpressionSet")
+  xset <- Biobase::ExpressionSet()
   dfr <- data.frame()
   mat <- matrix()
-  mlm <- new("MArrayLM")
-  notA <- "Not of the right class"
+  mlm <- new("MArrayLM", "limma")
+  incorrect_class <- "Not of the right class"
 
   expect_error(
     object = new(
       "eset_limma_dataset",
-      eset = notA, design = dfr, contrast = mat, fits.init = mlm, fits = mlm
+      eset = incorrect_class, design = dfr, contrast = mat, fits.init = mlm,
+      fits = mlm
     ),
     info = "If eset is defined, it should be a subclass of ExpressionSet"
   )
@@ -90,7 +89,8 @@ test_that("Validity of eset_limma_datasets (entries and dimensions)", {
   expect_error(
     object = new(
       "eset_limma_dataset",
-      eset = xset, design = notA, contrast = mat, fits.init = mlm, fits = mlm
+      eset = xset, design = incorrect_class, contrast = mat, fits.init = mlm,
+      fits = mlm
     ),
     info = "If design is defined, it should be a data.frame"
   )
@@ -98,7 +98,8 @@ test_that("Validity of eset_limma_datasets (entries and dimensions)", {
   expect_error(
     object = new(
       "eset_limma_dataset",
-      eset = xset, design = dfr, contrast = notA, fits.init = mlm, fits = mlm
+      eset = xset, design = dfr, contrast = incorrect_class, fits.init = mlm,
+      fits = mlm
     ),
     info = "If contrast is defined, it should be a matrix"
   )
@@ -106,7 +107,8 @@ test_that("Validity of eset_limma_datasets (entries and dimensions)", {
   expect_error(
     object = new(
       "eset_limma_dataset",
-      eset = xset, design = dfr, contrast = mat, fits.init = notA, fits = mlm
+      eset = xset, design = dfr, contrast = mat, fits.init = incorrect_class,
+      fits = mlm
     ),
     info = "If fits.init is defined, it should be a subclass of MArrayLM"
   )
@@ -114,7 +116,8 @@ test_that("Validity of eset_limma_datasets (entries and dimensions)", {
   expect_error(
     object = new(
       "eset_limma_dataset",
-      eset = xset, design = dfr, contrast = mat, fits.init = mlm, fits = notA
+      eset = xset, design = dfr, contrast = mat, fits.init = mlm,
+      fits = incorrect_class
     ),
     info = "If fits.init is defined, it should be a subclass of MArrayLM"
   )
@@ -222,7 +225,7 @@ test_that("Default keep.sample.fn - keep all samples; die if no samples", {
     info = "Default keep.sample.fn should crash on an empty eset"
   )
 
-  eset_1x1 <- ExpressionSet(assayData = matrix(1))
+  eset_1x1 <- Biobase::ExpressionSet(assayData = matrix(1))
   expect_equal(
     object = gld_fnDefault_keepSample(gset = eset_1x1),
     expected = c(1),
@@ -238,24 +241,24 @@ test_that("Default exptDesign function - use title as a factor", {
     info = "Default exptDesign should crash on an empty eset"
   )
 
-  eset_noPData <- ExpressionSet(assayData = matrix(1))
+  eset_without_pheno_data <- Biobase::ExpressionSet(assayData = matrix(1))
   expect_error(
-    object = gld_fnDefault_exptDesign(gset = eset_noPData),
+    object = gld_fnDefault_exptDesign(gset = eset_without_pheno_data),
     info = "Default exptDesign should crash if no pData entries"
   )
 
-  eset_noTitle <- ExpressionSet(
+  eset_without_title_column <- Biobase::ExpressionSet(
     assayData = matrix(1),
-    pData = AnnotatedDataFrame(data.frame(NOT.A.TITLE = "A"))
+    pData = Biobase::AnnotatedDataFrame(data.frame(NOT.A.TITLE = "A"))
   )
   expect_error(
-    object = gld_fnDefault_exptDesign(gset = eset_noTitle),
+    object = gld_fnDefault_exptDesign(gset = eset_without_title_column),
     info = "Default exptDesign should crash if no `title` column in pData"
   )
 
-  eset_1level <- ExpressionSet(
+  eset_1level <- Biobase::ExpressionSet(
     assayData = matrix(1),
-    pData = AnnotatedDataFrame(data.frame(title = "A"))
+    pData = Biobase::AnnotatedDataFrame(data.frame(title = "A"))
   )
   expect_error(
     object = gld_fnDefault_exptDesign(gset = eset_1level),

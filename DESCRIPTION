@@ -18,5 +18,4 @@ Suggests:
 Imports:
     Biobase,
     limma,
-    methods,
-    magrittr
+    methods
