@@ -375,59 +375,108 @@ test_that("geo_id_to_accession: Conversion of GEO identifiers", {
 #   )
 # })
 
-# ###############################################################################
-# test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
-#   lambda_fn <- function(x) {
-#     paste_gene_symbols(
-#       entrez_ids = x,
-#       entrezgene_db = "org.Hs.eg.db",
-#       collapse_character = "|"
-#     )
-#   }
+###############################################################################
+test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
+  test_df <- data.frame(
+    ENTREZID = c(
+      "4", "1234", "10000", "1111", "1111", "4563", "7504", "956530"
+    ),
+    SYMBOL = c(
+      NA, "CCR5", "AKT3", "SYMBOL1", "SYMBOL2", NA, "XK", "NA"
+    ),
+    stringsAsFactors = FALSE
+  )
 
-#   expect_error(
-#     object = paste_gene_symbols(),
-#     info = "No input to paste_gene_symbols - should fail"
-#   )
+  build_test <- function(df = test_df, valid_db = TRUE) {
+    function(...) {
+      mockery::stub(paste_gene_symbols, "is_valid_orgdb", valid_db)
+      mockery::stub(paste_gene_symbols, "AnnotationDbi::keytypes", colnames(df))
+      dots <- list(...)
+      if ("entrez_ids" %in% names(dots)) {
+        filtered_df <- df[df$ENTREZID %in% dots$entrez_ids, ]
+        mockery::stub(paste_gene_symbols, "AnnotationDbi::select", filtered_df)
+      }
+      paste_gene_symbols(...)
+    }
+  }
 
-#   expect_error(
-#     object = paste_gene_symbols(NULL),
-#     info = "NULL input to paste_gene_symbols - should fail"
-#   )
+  expect_error(
+    object = build_test()(),
+    info = "No input to `paste_gene_symbols` - should fail"
+  )
+  expect_error(
+    object = build_test()(entrez_ids = NULL),
+    info = paste(
+      "entrez_ids should be defined in `paste_gene_symbols` - received NULL"
+    )
+  )
+  expect_error(
+    object = build_test()(entrez_ids = character(0)),
+    info = "entrez_ids should be non-empty in input to paste_gene_symbols"
+  )
+  expect_error(
+    object = build_test()(
+      entrez_ids = "1234"
+    ),
+    info = "entrezgene_db should be defined in `paste_gene_symbols`"
+  )
+  expect_error(
+    object = build_test(valid_db = FALSE)(
+      entrez_ids = "1234", entrezgene_db = "NOT.A.DATABASE"
+    ),
+    info = "The DB name / DB passed to paste_gene_symbols should be an OrgDB"
+  )
+  expect_equal(
+    object = build_test()(
+      entrez_ids = "1234", entrezgene_db = "REAL.DATABASE"
+    ),
+    expected = c("1234|CCR5"),
+    info = "Single, correctly mapping gene id"
+  )
+  expect_equal(
+    object = build_test()(
+      entrez_ids = c("1234", "10000"), entrezgene_db = "REAL.DATABASE"
+    ),
+    expected = c("1234|CCR5", "10000|AKT3"),
+    info = "Two, correctly mapping gene ids"
+  )
+  expect_equal(
+    object = build_test()(
+      entrez_ids = c("1111"), entrezgene_db = "REAL.DATABASE"
+    ),
+    expected = c("1111|SYMBOL1"),
+    info = paste(
+      "If several symbols are available for a gene ID, only return the first"
+    )
+  )
+  expect_error(
+    object = build_test(
+      df = data.frame(
+        not.entrez = letters, not.symbol = LETTERS, stringsAsFactors = FALSE
+      )
+    )(
+      entrez_ids = letters[1:3], entrezgene_db = "REAL.DATABASE"
+    ),
+    regexp = "ENTREZID and SYMBOL should be keytypes in `entrezgene_db`",
+    info = "The database should have colnames ENTREZID and SYMBOL"
+  )
+  # Note that 4663 used to be gene symbol "NA" = neuroacanthocytosis
+  #   although this is now "7504|XK"
+  expect_equal(
+    object = build_test()(
+      entrez_ids = c("4", "4663", "7504"), entrezgene_db = "REAL.DATABASE"
+    ),
+    expected = c("4|---", "4663|---", "7504|XK"),
+    info = "Non-mapping gene ids - should return 'gene.id|---'"
+  )
 
-#   expect_error(
-#     object = paste_gene_symbols(character(0)),
-#     info = "Empty vector input to paste_gene_symbols - should fail"
-#   )
+  expect_equal(
+    object = build_test()(
+      entrez_ids = "956530", entrezgene_db = "REAL.DATABASE"
+    ),
+    expected = "956530|NA",
+    info = "It handles the string 'NA'"
+  )
+})
 
-#   expect_error(
-#     object = paste_gene_symbols(
-#       entrez_ids = "1234",
-#       entrezgene_db = "NOT.A.DATABASE"
-#     ),
-#     info = "No AnnotationDbi input to paste_gene_symbols - should fail"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn("1234"),
-#     expected = c("1234|CCR5"),
-#     info = "Single, correctly mapping gene id"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn(c("1234", "10000")),
-#     expected = c("1234|CCR5", "10000|AKT3"),
-#     info = "Two, correctly mapping gene ids"
-#   )
-
-#   # Note that 4663 used to be gene symbol "NA" = neuroacanthocytosis
-#   #   although this is now "7504|XK"
-#   # Also, note that default return from merge(., .) is as.character(NA)
-#   expect_equal(
-#     object = lambda_fn(c("4", "5", "6", "4663", "7504")),
-#     expected = c("4|---", "5|---", "6|---", "4663|---", "7504|XK"),
-#     info = "Some non-mapping gene ids - should return 'gene.id|---'"
-#   )
-# })
-
-# ###############################################################################
+###############################################################################
