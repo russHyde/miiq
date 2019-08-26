@@ -9,6 +9,9 @@ context("Tests for rh_microarray_functions.R")
 ###############################################################################
 
 library("Biobase")
+
+adf <- Biobase::AnnotatedDataFrame
+
 # library("org.Hs.eg.db")
 # library("org.Mm.eg.db")
 
@@ -23,7 +26,7 @@ eset_NA <- new(
 )
 
 eset_no_genbank <- eset_empty
-Biobase::featureData(eset_no_genbank) <- Biobase::AnnotatedDataFrame(
+Biobase::featureData(eset_no_genbank) <- adf(
   data = data.frame(
     NOT.A.GENBANK.COLUMN = character(0),
     stringsAsFactors = FALSE
@@ -31,7 +34,7 @@ Biobase::featureData(eset_no_genbank) <- Biobase::AnnotatedDataFrame(
 )
 
 eset_refseq <- eset_empty
-Biobase::featureData(eset_refseq) <- Biobase::AnnotatedDataFrame(
+Biobase::featureData(eset_refseq) <- adf(
   data = data.frame(
     "RefSeq Transcript ID" = character(0),
     check.names = FALSE,
@@ -226,12 +229,15 @@ test_that("get_refseq_column: validity of inputs", {
     )
   )
 
-  eset_nonCharacter_genbank <- eset_empty
-  featureData(eset_nonCharacter_genbank) <- AnnotatedDataFrame(
+  eset_non_character_genbank <- eset_empty
+
+  Biobase::featureData(
+    eset_non_character_genbank
+  ) <- adf(
     data = data.frame("GB_LIST" = logical(0))
   )
   expect_error(
-    get_refseq_column(eset = eset_nonCharacter_genbank),
+    get_refseq_column(eset = eset_non_character_genbank),
     info = "the genbank column is a character of factor"
   )
 })
@@ -251,7 +257,7 @@ test_that("get_refseq_column: correct outputs", {
 
   # Genbank column pulled out even if it's a factor:
   eset_refseq_factor <- eset_empty
-  featureData(eset_refseq_factor) <- AnnotatedDataFrame(
+  Biobase::featureData(eset_refseq_factor) <- adf(
     data = data.frame(
       "RefSeq Transcript ID" = character(0),
       check.names = FALSE,
@@ -267,7 +273,7 @@ test_that("get_refseq_column: correct outputs", {
   # The function should be robust to application of R's make.names function to
   #   the featureData columns
   eset_refseq_makenames <- eset_empty
-  featureData(eset_refseq) <- AnnotatedDataFrame(
+  Biobase::featureData(eset_refseq) <- adf(
     data = data.frame(
       "RefSeq.Transcript.ID" = character(0),
       stringsAsFactors = FALSE
@@ -284,7 +290,7 @@ test_that("get_refseq_column: correct outputs", {
 
   # The function should pick GB_LIST before GB_ACC
   eset_gbacc_first <- eset_empty
-  featureData(eset_gbacc_first) <- AnnotatedDataFrame(
+  Biobase::featureData(eset_gbacc_first) <- adf(
     data = data.frame(
       "GB_ACC" = character(0),
       "GB_LIST" = character(0),
@@ -335,20 +341,20 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
   # - note that Biobase::ExpressionSet can only take strings in the
   # annotation(.) slot
   #
-  eset_nullPlatform <- eset_empty
-  annotation(eset_nullPlatform) <- character(0)
+  eset_null_platform <- eset_empty
+  annotation(eset_null_platform) <- character(0)
   expect_error(
-    add_entrez_ids_to_esets(esets = eset_nullPlatform),
+    add_entrez_ids_to_esets(esets = eset_null_platform),
     info = paste(
       "add_entrez_ids_to_esets fails if any ESet has an empty",
       "'annotation'"
     )
   )
 
-  eset_emptyPlatform <- eset_empty
-  annotation(eset_emptyPlatform) <- ""
+  eset_empty_platform <- eset_empty
+  annotation(eset_empty_platform) <- ""
   expect_error(
-    add_entrez_ids_to_esets(esets = eset_emptyPlatform),
+    add_entrez_ids_to_esets(esets = eset_empty_platform),
     info = paste(
       "add_entrez_ids_to_esets fails if any ESet has an empty",
       "'annotation'"
@@ -358,16 +364,16 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
   # If the featureData does not have a defined refseq column, the function
   # should fail
   # - implicitly tested via get_refseq_column
-  eset_noRefseqCol <- eset_empty
-  annotation(eset_noRefseqCol) <- "SOME PLATFORM"
-  featureData(eset_noRefseqCol) <- AnnotatedDataFrame(
+  eset_no_refseq_column <- eset_empty
+  annotation(eset_no_refseq_column) <- "SOME PLATFORM"
+  Biobase::featureData(eset_no_refseq_column) <- adf(
     data.frame(
       "NOT A REFSEQ COLUMN" = character(0),
       stringsAsFactors = FALSE
     )
   )
   expect_error(
-    add_entrez_ids_to_esets(esets = eset_noRefseqCol),
+    add_entrez_ids_to_esets(esets = eset_no_refseq_column),
     info = paste(
       "add_entrez_ids_to_esets fails unless all ESets have a valid ",
       "refseq/genbank column"
@@ -383,14 +389,14 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #       esets = esets,
 #       entrezgene.db = db
 #     )
-#     featureData(res)[["entrez.id"]]
+#     Biobase::featureData(res)[["entrez.id"]]
 #   }
 
 #   # Logic tests (low level stuff is done by multisymbol_to_entrez_ids):
 #   # Blank refseq entries, NA refseq entries should map to NA
 #   eset_blankRefseqs <- eset_empty
 #   annotation(eset_blankRefseqs) <- "SOME_OTHER_PLATFORM"
-#   featureData(eset_blankRefseqs) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_blankRefseqs) <- adf(
 #     data.frame("GB_ACC" = c(NA, ""), stringsAsFactors = FALSE)
 #   )
 #   expect_blankRefseqs <- rep(as.character(NA), 2)
@@ -404,7 +410,7 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #   # A single refseq entry that maps to a single human gene
 #   eset_singleRefseq <- eset_empty
 #   annotation(eset_singleRefseq) <- "platform.1"
-#   featureData(eset_singleRefseq) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_singleRefseq) <- adf(
 #     data.frame(
 #       "GB_LIST" = "NM_000579", # CCR5/'1234'
 #       stringsAsFactors = FALSE
@@ -421,7 +427,7 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #   # A ' /// '-separated entry of refseq ids
 #   eset_twoRefseq <- eset_empty
 #   annotation(eset_twoRefseq) <- "GPL12345"
-#   featureData(eset_twoRefseq) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_twoRefseq) <- adf(
 #     data.frame(
 #       "GB_LIST" = "NM_001307936 /// NM_018976",
 #       stringsAsFactors = FALSE
@@ -438,7 +444,7 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #   # A ','-separated entry of refseq ids
 #   eset_commaRefseq <- eset_empty
 #   annotation(eset_commaRefseq) <- "GPL9876"
-#   featureData(eset_commaRefseq) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_commaRefseq) <- adf(
 #     data.frame(
 #       "GB_LIST" = "NM_001130045,NM_153254,BC126152",
 #       stringsAsFactors = FALSE
@@ -455,7 +461,7 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #   # refseq to entrez mapping for two different mouse probes:
 #   eset_mouseRefseq <- eset_empty
 #   annotation(eset_mouseRefseq) <- "GPL1261"
-#   featureData(eset_mouseRefseq) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_mouseRefseq) <- adf(
 #     data.frame(
 #       "RefSeq Transcript ID" = c("NM_017477 /// NM_201244", "NM_013477"),
 #       stringsAsFactors = TRUE,
@@ -474,7 +480,7 @@ test_that("add_entrez_ids_to_esets: validity of inputs", {
 #   # Add entrez.ids to a swissprot-containing ESet
 #   eset_swissprot <- eset_empty
 #   annotation(eset_swissprot) <- "SOME GPL ID"
-#   featureData(eset_swissprot) <- AnnotatedDataFrame(
+#   Biobase::featureData(eset_swissprot) <- adf(
 #     data.frame(
 #       "swissprot" = c(NA, "", "---", "ENST0000412115", "NR_046018",
 #       "NM_001005221"),
@@ -628,92 +634,92 @@ test_that("Unit tests for filter_and_transform_eset", {
   )
 
   # Log2 transform an eset - all positive
-  dnames_allPos <- list(1:2, 1:3)
-  eset_allPos <- new(
+  dnames_all_positive <- list(1:2, 1:3)
+  eset_all_positive <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         1, 2, 4,
         1, 1 / 2, 1 / 4
       ),
-      nrow = 2, byrow = TRUE, dimnames = dnames_allPos
+      nrow = 2, byrow = TRUE, dimnames = dnames_all_positive
     )
   )
-  expect_allPos <- new(
+  expect_all_positive <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         0, 1, 2,
         0, -1, -2
       ),
-      nrow = 2, byrow = TRUE, dimnames = dnames_allPos
+      nrow = 2, byrow = TRUE, dimnames = dnames_all_positive
     )
   )
   expect_equal(
     ft_runner(
-      eset = eset_allPos,
-      log2_transform = TRUE,
+      eset = eset_all_positive,
+      log2_transform = TRUE
     ),
-    expect_allPos,
+    expect_all_positive,
     info = "Log2 transformation of an all-positive ESet"
   )
 
   # Log2 transform an eset - some NA present
-  dnames_someNAs <- list(1:2, 1:3)
-  eset_someNAs <- new(
+  dnames_some_na_values <- list(1:2, 1:3)
+  eset_some_na_values <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         NA, 2, 4,
         1, 1 / 2, NaN
       ),
-      nrow = 2, byrow = TRUE, dimnames = dnames_someNAs
+      nrow = 2, byrow = TRUE, dimnames = dnames_some_na_values
     )
   )
-  expect_someNAs <- new(
+  expect_some_na_values <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         NA, 1, 2,
         0, -1, NA
       ),
-      nrow = 2, byrow = TRUE, dimnames = dnames_someNAs
+      nrow = 2, byrow = TRUE, dimnames = dnames_some_na_values
     )
   )
 
   expect_equal(
     ft_runner(
-      eset = eset_someNAs,
+      eset = eset_some_na_values,
       log2_transform = TRUE,
-      drop_row_na_inf_threshold = 1,
+      drop_row_na_inf_threshold = 1
     ),
-    expect_someNAs,
+    expect_some_na_values,
     info = "transform Eset, some input entries are NA"
   )
 
   # Fail to Log2 transform an eset containing negatives
-  dnames_someNeg <- list(1:2, 1:3)
-  eset_someNeg <- new(
+  dnames_some_negative_values <- list(1:2, 1:3)
+  eset_some_negative_values <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         -1, 2, NA,
         1, -1 / 2, 1 / 4
       ),
-      nrow = 2, byrow = TRUE, dimnames = dnames_someNeg
+      nrow = 2, byrow = TRUE, dimnames = dnames_some_negative_values
     )
   )
   expect_error(
     ft_runner(
-      eset = eset_someNeg,
+      eset = eset_some_negative_values,
       log2_transform = TRUE
     ),
     info = "fail to log2-transform an eset containing negatives"
   )
 
   # Drop a duplicated row
-  dnames_dupRow <- list(1:3, 1:2)
-  eset_dupRow <- new(
+  dnames_duplicated_row <- list(1:3, 1:2)
+  eset_duplicated_row <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -721,11 +727,11 @@ test_that("Unit tests for filter_and_transform_eset", {
         3, 4,
         1, 2
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_dupRow
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row
     )
   )
 
-  expect_dupRow_dropped <- new(
+  expect_duplicated_row_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -736,28 +742,28 @@ test_that("Unit tests for filter_and_transform_eset", {
     )
   )
 
-  expect_dupRow_notDropped <- eset_dupRow
+  expect_duplicated_row_not_dropped <- eset_duplicated_row
 
   expect_equal(
     ft_runner(
-      eset_dupRow,
+      eset_duplicated_row,
       drop_row_if_duplicated = TRUE
     ),
-    expect_dupRow_dropped,
+    expect_duplicated_row_dropped,
     info = "Dropping a duplicated row"
   )
 
   expect_equal(
     ft_runner(
-      eset_dupRow
+      eset_duplicated_row
     ),
-    expect_dupRow_notDropped,
+    expect_duplicated_row_not_dropped,
     info = "Not dropping a duplicated row"
   )
 
   # Drop a duplicated row - NA present
-  dnames_dupRow_NA <- list(1:3, 1:2)
-  eset_dupRow_NA <- new(
+  dnames_duplicated_row_NA <- list(1:3, 1:2)
+  eset_duplicated_row_NA <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -765,10 +771,10 @@ test_that("Unit tests for filter_and_transform_eset", {
         3, NA,
         3, NA
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_dupRow_NA
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row_NA
     )
   )
-  expect_dupRow_NA_dropped <- new(
+  expect_duplicated_row_NA_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -781,17 +787,17 @@ test_that("Unit tests for filter_and_transform_eset", {
 
   expect_equal(
     ft_runner(
-      eset = eset_dupRow_NA,
+      eset = eset_duplicated_row_NA,
       drop_row_if_duplicated = TRUE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_dupRow_NA_dropped,
+    expect_duplicated_row_NA_dropped,
     info = "Dropping a duplicated, NA-containing row"
   )
 
   # Drop a duplicated row - Inf present
-  dnames_dupRow_Inf <- list(1:3, 1:2)
-  eset_dupRow_Inf <- new(
+  dnames_duplicated_row_Inf <- list(1:3, 1:2)
+  eset_duplicated_row_Inf <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -799,10 +805,10 @@ test_that("Unit tests for filter_and_transform_eset", {
         1, Inf,
         3, 4
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_dupRow_Inf
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row_Inf
     )
   )
-  expect_dupRow_Int_dropped <- new(
+  expect_duplicated_row_Int_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -815,11 +821,11 @@ test_that("Unit tests for filter_and_transform_eset", {
 
   expect_equal(
     ft_runner(
-      eset = eset_dupRow_Inf,
+      eset = eset_duplicated_row_Inf,
       drop_row_if_duplicated = TRUE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_dupRow_Int_dropped,
+    expect_duplicated_row_Int_dropped,
     info = "Dropping a duplicated, Inf-containing row"
   )
 
@@ -850,7 +856,7 @@ test_that("Unit tests for filter_and_transform_eset", {
     )
   )
 
-  expect_Inf_notConverted <- new(
+  expect_inf_not_converted <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -880,7 +886,7 @@ test_that("Unit tests for filter_and_transform_eset", {
       convert_inf_to_na = FALSE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_Inf_notConverted,
+    expect_inf_not_converted,
     info = "Not converting Infs to NA during log-transformation"
   )
 
@@ -910,7 +916,7 @@ test_that("Unit tests for filter_and_transform_eset", {
     )
   )
 
-  expect_na50_notDropped <- new(
+  expect_na50_not_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -937,7 +943,7 @@ test_that("Unit tests for filter_and_transform_eset", {
       eset = eset_na50,
       drop_row_na_inf_threshold = 1
     ),
-    expect_na50_notDropped,
+    expect_na50_not_dropped,
     info = "Keeping all rows, despite NA/Inf presence"
   )
 
@@ -1033,26 +1039,26 @@ test_that("Unit tests for filter_and_transform_eset", {
   )
 
   # Tests for drop_row_if_zero_varianceiance
-  dnames_zeroVar <- list(1:2, 1:4)
-  eset_zeroVar <- new(
+  dnames_zero_variance <- list(1:2, 1:4)
+  eset_zero_variance <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
         1, 1, 1, 1,
         1, NA, 1, 1
       ),
-      nrow = 2, ncol = 4, byrow = TRUE, dimnames = dnames_zeroVar
+      nrow = 2, ncol = 4, byrow = TRUE, dimnames = dnames_zero_variance
     )
   )
-  expect_zeroVar <- eset_zeroVar[c(), ]
+  expect_zero_variance <- eset_zero_variance[c(), ]
 
   expect_equal(
     ft_runner(
-      eset_zeroVar,
+      eset_zero_variance,
       drop_row_na_inf_threshold = 1,
       drop_row_if_zero_variance = TRUE
     ),
-    expect_zeroVar,
+    expect_zero_variance,
     info = "Dropping rows that have no inter-sample variance"
   )
 })
