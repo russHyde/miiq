@@ -20,7 +20,7 @@ adf <- Biobase::AnnotatedDataFrame
 
 eset_empty <- new("ExpressionSet")
 
-eset_NA <- new(
+eset_with_only_na_values <- new(
   "ExpressionSet",
   exprs = matrix(NA)
 )
@@ -80,7 +80,7 @@ test_that("check_if_pretransformed_eset: correct outputs", {
 
   # An ESet containing all NA entries: Assume it has been log-transformed
   expect_equal(
-    check_if_pretransformed_eset(eset = eset_NA),
+    check_if_pretransformed_eset(eset = eset_with_only_na_values),
     TRUE,
     info = "All-NA eset is transformed"
   )
@@ -112,7 +112,7 @@ test_that("check_if_pretransformed_eset: correct outputs", {
 
   # An Eset with a high range and containing some NA values
   # - Assume the eset is not log-transformed
-  eset_high_range_NA <- new(
+  eset_high_range_with_na_values <- new(
     "ExpressionSet",
     exprs = matrix(
       # the function should determine the range as 1001
@@ -127,7 +127,7 @@ test_that("check_if_pretransformed_eset: correct outputs", {
   )
   expect_equal(
     check_if_pretransformed_eset(
-      eset = eset_high_range_NA,
+      eset = eset_high_range_with_na_values,
       range_limit_if_transformed = 1000
     ),
     FALSE,
@@ -718,8 +718,8 @@ test_that("Unit tests for filter_and_transform_eset", {
   )
 
   # Drop a duplicated row
-  dnames_duplicated_row <- list(1:3, 1:2)
-  eset_duplicated_row <- new(
+  dnames_dupd_row <- list(1:3, 1:2)
+  eset_dupd_row <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -727,11 +727,11 @@ test_that("Unit tests for filter_and_transform_eset", {
         3, 4,
         1, 2
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row
+      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_dupd_row
     )
   )
 
-  expect_duplicated_row_dropped <- new(
+  expect_dupd_row_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -742,28 +742,28 @@ test_that("Unit tests for filter_and_transform_eset", {
     )
   )
 
-  expect_duplicated_row_not_dropped <- eset_duplicated_row
+  expect_dupd_row_not_dropped <- eset_dupd_row
 
   expect_equal(
     ft_runner(
-      eset_duplicated_row,
+      eset_dupd_row,
       drop_row_if_duplicated = TRUE
     ),
-    expect_duplicated_row_dropped,
+    expect_dupd_row_dropped,
     info = "Dropping a duplicated row"
   )
 
   expect_equal(
     ft_runner(
-      eset_duplicated_row
+      eset_dupd_row
     ),
-    expect_duplicated_row_not_dropped,
+    expect_dupd_row_not_dropped,
     info = "Not dropping a duplicated row"
   )
 
   # Drop a duplicated row - NA present
-  dnames_duplicated_row_NA <- list(1:3, 1:2)
-  eset_duplicated_row_NA <- new(
+  dnames_dupd_row_with_na_values <- list(1:3, 1:2)
+  eset_dupd_row_with_na_values <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -771,10 +771,11 @@ test_that("Unit tests for filter_and_transform_eset", {
         3, NA,
         3, NA
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row_NA
+      nrow = 3, ncol = 2, byrow = TRUE,
+      dimnames = dnames_dupd_row_with_na_values
     )
   )
-  expect_duplicated_row_NA_dropped <- new(
+  expect_dupd_row_with_na_values_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -787,17 +788,17 @@ test_that("Unit tests for filter_and_transform_eset", {
 
   expect_equal(
     ft_runner(
-      eset = eset_duplicated_row_NA,
+      eset = eset_dupd_row_with_na_values,
       drop_row_if_duplicated = TRUE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_duplicated_row_NA_dropped,
+    expect_dupd_row_with_na_values_dropped,
     info = "Dropping a duplicated, NA-containing row"
   )
 
   # Drop a duplicated row - Inf present
-  dnames_duplicated_row_Inf <- list(1:3, 1:2)
-  eset_duplicated_row_Inf <- new(
+  dnames_dupd_row_with_inf_values <- list(1:3, 1:2)
+  eset_dupd_row_with_inf_values <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -805,10 +806,11 @@ test_that("Unit tests for filter_and_transform_eset", {
         1, Inf,
         3, 4
       ),
-      nrow = 3, ncol = 2, byrow = TRUE, dimnames = dnames_duplicated_row_Inf
+      nrow = 3, ncol = 2, byrow = TRUE,
+      dimnames = dnames_dupd_row_with_inf_values
     )
   )
-  expect_duplicated_row_Int_dropped <- new(
+  expect_dupd_row_inf_dropped <- new(
     "ExpressionSet",
     exprs = matrix(
       c(
@@ -821,11 +823,11 @@ test_that("Unit tests for filter_and_transform_eset", {
 
   expect_equal(
     ft_runner(
-      eset = eset_duplicated_row_Inf,
+      eset = eset_dupd_row_with_inf_values,
       drop_row_if_duplicated = TRUE,
       drop_row_na_inf_threshold = 1
     ),
-    expect_duplicated_row_Int_dropped,
+    expect_dupd_row_inf_dropped,
     info = "Dropping a duplicated, Inf-containing row"
   )
 

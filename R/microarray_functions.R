@@ -39,7 +39,6 @@ filter_and_transform_eset <- function(
                                         "none"
                                       ),
                                       drop_row_na_inf_threshold = 0.25) {
-
   normalise_method <- match.arg(normalise_method)
 
   # Function to filter / transform the entries in the exprs entry of
@@ -90,7 +89,7 @@ filter_and_transform_eset <- function(
   }
 
   Biobase::exprs(eset) <- normalisation_functions[[
-    normalise_method
+  normalise_method
   ]](Biobase::exprs(eset))
 
   # Convert infinite values to NA
