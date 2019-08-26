@@ -1,5 +1,121 @@
 ###############################################################################
 
+#' Function that filters and transforms the entries in the \code{exprs} entry
+#' of an \code{ExpressionSet}
+#'
+#' @param        eset          An \code{ExpressionSet}.
+#' @param        log2_transform   BOOLEAN : Should the \code{ExpressionSet} be
+#'   log2-transformed?
+#' @param        drop_row_if_duplicated   BOOLEAN : Should rows be dropped if
+#'   they are (numerical) duplicates of another row?
+#' @param        drop_row_if_zero_variance   BOOLEAN : Should rows be dropped
+#'   if they are constant?
+#' @param        convert_inf_to_na   BOOLEAN : Should infinite vals be
+#'   converted to NA?
+#' @param        normalise_method   String from "quantile" (quantile-normalise
+#'   the dataset, the default), "median" (subtract the medians off),
+#'   "median_iqr" (subtract off the medians and divide by the iqr) or "none"
+#'   (leave the dataset untouched).
+#' @param        drop_row_na_inf_threshold   What fraction of missing (NA) or
+#'   infinite values are permitted in a row before that row is dropped from
+#'   further analysis.
+#'
+#' @importFrom   Biobase       exprs   exprs<-
+#' @importFrom   stats         sd   median   IQR
+#' @importFrom   preprocessCore   normalize.quantiles
+#'
+#' @export
+#'
+
+filter_and_transform_eset <- function(
+                                      eset = NULL,
+                                      # -- options
+                                      log2_transform = TRUE,
+                                      drop_row_if_duplicated = TRUE,
+                                      drop_row_if_zero_variance = TRUE,
+                                      convert_inf_to_na = TRUE,
+                                      normalise_method = c(
+                                        "quantile", "median", "median_iqr",
+                                        "none"
+                                      ),
+                                      drop_row_na_inf_threshold = 0.25) {
+
+  normalise_method <- match.arg(normalise_method)
+
+  # Function to filter / transform the entries in the exprs entry of
+  #   an ExpressionSet
+
+  # Check that the input is a valid 'eset'
+  if (is.null(eset) | !is(eset, "ExpressionSet")) {
+    stop("'eset' should be a valid Biobase::ExpressionSet")
+  }
+
+  if (nrow(eset) == 0 || ncol(eset) == 0) {
+    return(eset)
+  }
+
+  # Log2 normalise the dataset
+  if (log2_transform) {
+    if (any(exprs(eset) < 0, na.rm = TRUE)) {
+      stop("Attempt to log transform negatives in eset")
+    }
+    Biobase::exprs(eset) <- log2(exprs(eset))
+  }
+  # Drop duplicated rows
+  if (drop_row_if_duplicated) {
+    keep_rows <- rownames(unique(exprs(eset)))
+    eset <- eset[keep_rows, ]
+  }
+  # Drop rows that have a variance of zero
+  # TODO: - Should this be done after transformations have been performed?
+  if (drop_row_if_zero_variance) {
+    sds <- apply(exprs(eset), 1, sd)
+    keep_rows <- which(sds > 0)
+    eset <- eset[keep_rows, ]
+  }
+
+  # Normalisation step:
+  normalisation_functions <- list(
+    "none" = identity,
+    "quantile" = preprocessCore::normalize.quantiles
+  )
+  normalisation_functions$median <- function(xs) {
+    medians <- apply(xs, 2, function(x) median(na_inf_omit(x)))
+    sweep(xs, MARGIN = 2, STATS = medians, FUN = "-")
+  }
+  normalisation_functions$median_iqr <- function(xs) {
+    ys <- normalisation_functions$median(xs)
+    iqrs <- apply(ys, 2, function(x) IQR(na_inf_omit(x)))
+    sweep(ys, MARGIN = 2, STATS = iqrs, FUN = "/")
+  }
+
+  Biobase::exprs(eset) <- normalisation_functions[[
+    normalise_method
+  ]](Biobase::exprs(eset))
+
+  # Convert infinite values to NA
+  if (convert_inf_to_na) {
+    inf_idx <- which(is.infinite(exprs(eset)))
+    Biobase::exprs(eset)[inf_idx] <- NA
+  }
+
+  # Drop any probes that have too many NA or Inf values in the dataset
+  # Each probe should have <= 100*drop.row...threshold % NA or Inf
+  na_inf_count <- apply(Biobase::exprs(eset), 1, function(x) {
+    length(which(is.na(x) | is.infinite(x)))
+  })
+  keep_probes <- which(
+    na_inf_count <= (drop_row_na_inf_threshold * ncol(eset))
+  )
+  eset <- eset[keep_probes, ]
+
+  # Drop rows with an NA or Inf fraction > threshold
+  # Quantile normalise within each array to ensure median = 0 and iqr = 1
+  return(eset)
+}
+
+###############################################################################
+
 #' Function that performs a few tests to check if a given \code{ExpressionSet}
 #' has already been log-transformed
 #'

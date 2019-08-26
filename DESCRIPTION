@@ -20,7 +20,8 @@ Imports:
     limma,
     methods,
     moments,
-    magrittr
+    magrittr,
+    preprocessCore
 Collate:
     'microarray_classes.R'
     'vector_manipulation.R'
