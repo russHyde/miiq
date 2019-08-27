@@ -24,7 +24,8 @@ Imports:
     magrittr,
     preprocessCore,
     stringr,
-    AnnotationDbi
+    AnnotationDbi,
+    dplyr
 Collate:
     'id_mapping.R'
     'microarray_classes.R'
