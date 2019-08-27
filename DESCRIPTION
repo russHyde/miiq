@@ -25,7 +25,8 @@ Imports:
     preprocessCore,
     stringr,
     AnnotationDbi,
-    dplyr
+    dplyr,
+    rlang
 Collate:
     'id_mapping.R'
     'microarray_classes.R'

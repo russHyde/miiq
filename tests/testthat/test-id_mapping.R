@@ -4,16 +4,6 @@ context("Tests mappings to/from Database-specific Ids")
 
 ###############################################################################
 
-# #' @import       org.Hs.eg.db
-# ensembl_fn <- function(x) symbol_to_entrez_id(
-#     gene_symbols = x,
-#     symbol_type = "ENSEMBL",
-#     entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
-#   )
-# optim.flag <- 1 # used for multisymbol_to_entrez_id
-
-# ###############################################################################
-
 ### ======================================================================= ###
 #   Non-gene databases
 ### ======================================================================= ###
@@ -95,9 +85,15 @@ test_that("Mappings from SYMBOL to Entrez ids", {
   symbol_fn <- function(x) {
     filtered_df <- test_df[test_df$SYMBOL %in% x, ]
     mockery::stub(symbol_to_entrez_id, "is_valid_orgdb", TRUE)
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df$SYMBOL))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::select", filtered_df)
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df$SYMBOL)
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df)
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::select", filtered_df
+    )
 
     symbol_to_entrez_id(
       gene_symbols = x,
@@ -165,10 +161,18 @@ test_that("Mappings from Genbank id to Entrez.id", {
   genbank_fn <- function(x, sym = "REFSEQ") {
     trimmed_x <- gsub(pattern = "^(.*)\\.(.*)$", replacement = "\\1", x)
     filtered_df <- test_df[test_df[, sym] %in% trimmed_x, ]
-    mockery::stub(symbol_to_entrez_id, "is_valid_orgdb", TRUE)
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df[, sym]))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::select", filtered_df)
+    mockery::stub(
+      symbol_to_entrez_id, "is_valid_orgdb", TRUE
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df[, sym])
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df)
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::select", filtered_df
+    )
 
     symbol_to_entrez_id(
       gene_symbols = x,
@@ -242,10 +246,18 @@ test_that("Ensembl-Genes mapping to EntrezGene", {
 
   ensembl_fn <- function(x, sym = "ENSEMBL") {
     filtered_df <- test_df[test_df[, sym] %in% x, ]
-    mockery::stub(symbol_to_entrez_id, "is_valid_orgdb", TRUE)
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df[, sym]))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df))
-    mockery::stub(symbol_to_entrez_id, "AnnotationDbi::select", filtered_df)
+    mockery::stub(
+      symbol_to_entrez_id, "is_valid_orgdb", TRUE
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keys", unique(test_df[, sym])
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::keytypes", colnames(test_df)
+    )
+    mockery::stub(
+      symbol_to_entrez_id, "AnnotationDbi::select", filtered_df
+    )
 
     symbol_to_entrez_id(
       gene_symbols = x,
@@ -268,77 +280,10 @@ test_that("Ensembl-Genes mapping to EntrezGene", {
     object = ensembl_fn("ENSG00000067601"),
     expected = as.character(NA),
     info = paste(
-      "Processed psedogene: initially mapped to empty string instead of <NA>"
+      "Processed pseudogene: initially mapped to empty string instead of <NA>"
     )
   )
 })
-
-# ###############################################################################
-
-# test_that("Testing multisymbol mapper: Ensembl to Entrez", {
-#   lambda_ensembl <- function(x) {
-#     multisymbol_to_entrez_ids(
-#       gene_symbols = x,
-#       symbol_type = "ENSEMBL",
-#       entrezgene_db = org.Hs.eg.db::org.Hs.eg.db,
-#       optim_flag = optim.flag
-#     )
-#   }
-
-#   expect_equal(
-#     object = lambda_ensembl("ENSG00000004866"),
-#     expected = c("7982|93655"),
-#     info = "Multiply-mapping single gene"
-#   )
-
-#   expect_equal(
-#     object = lambda_ensembl("ENSG00000004866|ENSG0000004866"),
-#     expected = c("7982|93655"),
-#     info = "Multiply-mapping duplicated gene"
-#   )
-# })
-
-# ###############################################################################
-
-# test_that("Testing multisymbol mapper: Genbank to Entrez", {
-#   lambda_fn_genbank <- function(x) {
-#     multisymbol_to_entrez_ids(
-#       gene_symbols = x,
-#       symbol_type = "REFSEQ",
-#       entrezgene_db = org.Hs.eg.db::org.Hs.eg.db
-#     )
-#   }
-
-#   expect_equal(
-#     object = lambda_fn_genbank(c()),
-#     expected = c(),
-#     info = "Empty input(genbank)"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn_genbank(NULL),
-#     expected = c(),
-#     info = "NULL input(genbank)"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn_genbank(""),
-#     expected = as.character(NA),
-#     info = "Empty string input(genbank)"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn_genbank("DOESNOTMAP"),
-#     expected = as.character(NA),
-#     info = "Single non-mapping non-empty string(genbank)"
-#   )
-
-#   expect_equal(
-#     object = lambda_fn_genbank("NM_001206729"),
-#     expected = "10000",
-#     info = "Singly-mapping input"
-#   )
-# })
 
 ###############################################################################
 test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
@@ -354,14 +299,19 @@ test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
 
   build_test <- function(df = test_df, valid_db = TRUE) {
     function(...) {
-      mockery::stub(paste_gene_symbols, "is_valid_orgdb", valid_db)
-      mockery::stub(paste_gene_symbols, "AnnotationDbi::keytypes", colnames(df))
       dots <- list(...)
-      if ("entrez_ids" %in% names(dots)) {
-        filtered_df <- df[df$ENTREZID %in% dots$entrez_ids, ]
-        mockery::stub(paste_gene_symbols, "AnnotationDbi::select", filtered_df)
+      filtered_df <- if ("entrez_ids" %in% names(dots)) {
+        df[df$ENTREZID %in% dots$entrez_ids, ]
+      } else {
+        df
       }
-      paste_gene_symbols(...)
+      mockery::stub(paste_gene_symbols, "is_valid_orgdb", valid_db)
+      testthat::with_mock(
+        keytypes = function(...) colnames(df),
+        select = function(...) filtered_df,
+        paste_gene_symbols(...),
+        .env = "AnnotationDbi"
+      )
     }
   }
 
@@ -447,78 +397,210 @@ test_that("Testing entrez_id -> 'entrez_id|gene_symbol' mappings", {
 ###############################################################################
 
 test_that("Testing multisymbol mapper: Symbols to Entrez", {
+
+  # Define data-frame as mock database for use in the tests
+  test_df <- data.frame(
+    ENTREZID = c("10000", "1234", "54407", "7504"),
+    SYMBOL = c("AKT3", "CCR5", "SLC38A2", "XK"),
+    stringsAsFactors = FALSE
+  )
+
   # Tests using HGNC symbols as input
-  lambda_fn <- function(x) {
-    multisymbol_to_entrez_ids(
-      gene_symbols = x,
-      symbol_type = "SYMBOL",
-      entrezgene_db = org.Hs.eg.db::org.Hs.eg.db,
-      optim_flag = optim.flag
+  # - Mock out calls to `AnnotationDbi` functions
+  # - Mock out calls to `is_valid_orgdb`
+  lambda_fn <- function(x, sym = "SYMBOL") {
+    symbols <- if (length(x) > 0) {
+      unlist(strsplit(x, "\\|"))
+    } else {
+      x
+    }
+    filtered_df <- test_df[test_df[, sym] %in% symbols, ]
+    testthat::with_mock(
+      "miiq::is_valid_orgdb" = function(...) TRUE,
+      "AnnotationDbi::keys" = function(...) unique(test_df[, sym]),
+      "AnnotationDbi::keytypes" = function(...) colnames(test_df),
+      "AnnotationDbi::select" = function(...) filtered_df,
+      multisymbol_to_entrez_ids(
+        gene_symbols = x,
+        symbol_type = sym,
+        entrezgene_db = "SOME.DATABASE"
+      )
     )
   }
 
   expect_equal(
     object = lambda_fn(c()),
-    expected = c(),
+    expected = character(0),
     info = "Multisymbol: Empty input"
   )
 
   expect_equal(
     object = lambda_fn(NULL),
-    expected = c(),
+    expected = character(0),
     info = "Multisymbol: NULL input"
   )
 
-  # expect_equal(
-  #  object = lambda_fn(""),
-  #  expected = as.character(NA),
-  #  info = "Multisymbol: Empty string"
-  # )
+  expect_equal(
+    object = lambda_fn(""),
+    expected = as.character(NA),
+    info = "Multisymbol: Empty string"
+  )
 
-  #   expect_equal(
-  #     object = lambda_fn("DOESNOTMAP"),
-  #     expected = as.character(NA),
-  #     info = "Multisymbol: Single non-mapping input"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn("AKT3"),
-  #     expected = "10000",
-  #     info = "Multisymbol: Singly-mapping input"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn(c("AKT3", "CCR5", "SLC38A2")),
-  #     expected = c("10000", "1234", "54407"),
-  #     info = "Multisymbol: Multiple singly-mapping inputs"
-  #   )
-  #   expect_equal(
-  #     object = lambda_fn(c("AKT3|AKT3")),
-  #     expected = "10000",
-  #     info = "A single many:one mapping input"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn("AKT3|CCR5"),
-  #     expected = "10000|1234",
-  #     info = "Multisymbol: A single many:many input"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn("AKT3|CCR5"),
-  #     expected = lambda_fn("CCR5|AKT3"),
-  #     info = "Lexicographic sorting of the output"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn("AKT3||DOESNOTMAP"),
-  #     expected = "10000",
-  #     info = "Delimited string of multiple ids; only one valid map"
-  #   )
-  #
-  #   expect_equal(
-  #     object = lambda_fn(c("AKT3|XK", "CCR5|SLC38A2")),
-  #     expected = c("10000|7504", "1234|54407"),
-  #     info = "Vector of multiply-mapping inputs"
-  #   )
+  expect_equal(
+    object = lambda_fn("DOESNOTMAP"),
+    expected = as.character(NA),
+    info = "Multisymbol: Single non-mapping input"
+  )
+
+  expect_equal(
+    object = lambda_fn("AKT3"),
+    expected = "10000",
+    info = "Multisymbol: Singly-mapping input"
+  )
+
+  expect_equal(
+    object = lambda_fn(c("AKT3", "CCR5", "SLC38A2")),
+    expected = c("10000", "1234", "54407"),
+    info = "Multisymbol: Multiple singly-mapping inputs"
+  )
+
+  expect_equal(
+    object = lambda_fn(c("AKT3|AKT3")),
+    expected = "10000",
+    info = "A single many:one mapping input"
+  )
+
+  expect_equal(
+    object = lambda_fn("AKT3|CCR5"),
+    expected = "10000|1234",
+    info = "Multisymbol: A single many:many input"
+  )
+
+  expect_equal(
+    object = lambda_fn("AKT3|CCR5"),
+    expected = lambda_fn("CCR5|AKT3"),
+    info = "Lexicographic sorting of the output"
+  )
+
+  expect_equal(
+    object = lambda_fn("AKT3||DOESNOTMAP"),
+    expected = "10000",
+    info = "Delimited string of multiple ids; only one valid map"
+  )
+
+  expect_equal(
+    object = lambda_fn(c("AKT3|XK", "CCR5|SLC38A2")),
+    expected = c("10000|7504", "1234|54407"),
+    info = "Vector of multiply-mapping inputs"
+  )
+})
+
+# ###############################################################################
+
+test_that("Testing multisymbol mapper: Ensembl to Entrez", {
+  # Define data-frame as mock database for use in the tests
+  test_df <- data.frame(
+    ENTREZID = c("7982", "93655"),
+    ENSEMBL = c("ENSG00000004866", "ENSG00000004866"),
+    stringsAsFactors = FALSE
+  )
+
+  # Tests using Ensembl symbols as input
+  # - Mock out calls to `AnnotationDbi` functions
+  # - Mock out calls to `is_valid_orgdb`
+  lambda_fn <- function(x, sym = "ENSEMBL") {
+    symbols <- if (length(x) > 0) {
+      unlist(strsplit(x, "\\|"))
+    } else {
+      x
+    }
+    filtered_df <- test_df[test_df[, sym] %in% symbols, ]
+    testthat::with_mock(
+      "miiq::is_valid_orgdb" = function(...) TRUE,
+      "AnnotationDbi::keys" = function(...) unique(test_df[, sym]),
+      "AnnotationDbi::keytypes" = function(...) colnames(test_df),
+      "AnnotationDbi::select" = function(...) filtered_df,
+      multisymbol_to_entrez_ids(
+        gene_symbols = x,
+        symbol_type = sym,
+        entrezgene_db = "SOME.DATABASE"
+      )
+    )
+  }
+
+  expect_equal(
+    object = lambda_fn("ENSG00000004866"),
+    expected = c("7982|93655"),
+    info = "Multiply-mapping single gene"
+  )
+
+  expect_equal(
+    object = lambda_fn("ENSG00000004866|ENSG0000004866"),
+    expected = c("7982|93655"),
+    info = "Multiply-mapping duplicated gene"
+  )
+})
+
+# ###############################################################################
+
+test_that("Testing multisymbol mapper: Genbank to Entrez", {
+  # Define data-frame as mock database for use in the tests
+  test_df <- data.frame(
+    ENTREZID = c("10000"),
+    REFSEQ = c("NM_001206729"),
+    stringsAsFactors = FALSE
+  )
+
+  # Tests using Genbank symbols as input
+  # - Mock out calls to `AnnotationDbi` functions
+  # - Mock out calls to `is_valid_orgdb`
+  lambda_fn <- function(x, sym = "REFSEQ") {
+    symbols <- if (length(x) > 0) {
+      unlist(strsplit(x, "\\|"))
+    } else {
+      x
+    }
+    filtered_df <- test_df[test_df[, sym] %in% symbols, ]
+    testthat::with_mock(
+      "miiq::is_valid_orgdb" = function(...) TRUE,
+      "AnnotationDbi::keys" = function(...) unique(test_df[, sym]),
+      "AnnotationDbi::keytypes" = function(...) colnames(test_df),
+      "AnnotationDbi::select" = function(...) filtered_df,
+      multisymbol_to_entrez_ids(
+        gene_symbols = x,
+        symbol_type = sym,
+        entrezgene_db = "SOME.DATABASE"
+      )
+    )
+  }
+
+  expect_equal(
+    object = lambda_fn(c()),
+    expected = character(0),
+    info = "Empty input(genbank)"
+  )
+
+  expect_equal(
+    object = lambda_fn(NULL),
+    expected = character(0),
+    info = "NULL input(genbank)"
+  )
+
+  expect_equal(
+    object = lambda_fn(""),
+    expected = as.character(NA),
+    info = "Empty string input(genbank)"
+  )
+
+  expect_equal(
+    object = lambda_fn("DOESNOTMAP"),
+    expected = as.character(NA),
+    info = "Single non-mapping non-empty string(genbank)"
+  )
+
+  expect_equal(
+    object = lambda_fn("NM_001206729"),
+    expected = "10000",
+    info = "Singly-mapping input"
+  )
 })

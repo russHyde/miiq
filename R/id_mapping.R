@@ -150,10 +150,10 @@ paste_gene_symbols <- function(entrez_ids,
 #' @export
 
 symbol_to_entrez_id <- function(
-  gene_symbols = character(0),
-  symbol_type  = "SYMBOL",
-  entrezgene_db = NULL,
-  collapse_character = "|") {
+                                gene_symbols = character(0),
+                                symbol_type = "SYMBOL",
+                                entrezgene_db = NULL,
+                                collapse_character = "|") {
 
   # Import / validate the provided database and check that genesymbols/entrez
   # ids are available
@@ -201,12 +201,13 @@ symbol_to_entrez_id <- function(
   if (any(duplicated(eg_map[, symbol_type]))) {
     # Gene symbols that map to multiple entrez ids return a collapsed string
     #   containing the sorted values
-    entrez_ids <- sapply(
+    entrez_ids <- vapply(
       gene_symbols,
       function(symbol) {
         r <- which(eg_map[, symbol_type] == symbol)
         paste(sort(eg_map[r, "ENTREZID"]), collapse = collapse_character)
-      }
+      },
+      character(1)
     )
     entrez_ids <- as.vector(entrez_ids)
   } else {
@@ -233,7 +234,7 @@ symbol_to_entrez_id <- function(
 #' The input may contain "multiple|joined|symbols", and if it does, the output
 #' for that entry will contain a "joined|string|of|ids" containing all of the
 #' unique values that any of the input symbols mapped to
-#' See symbol_to_entrez_id for further details
+#' See \code{symbol_to_entrez_id} for further details
 #'
 #' @param        gene_symbols   vector of gene_symbols of a single type.
 #' @param        symbol_type   type of the gene_symbols (eg, Refseq).
@@ -242,12 +243,12 @@ symbol_to_entrez_id <- function(
 #' @param        split_character   character string for splitting up the
 #'   symbols if any of the input entries contains more than one symbol.
 #' @param        collapse_character   character for collapsing entrez ids.
-#' @param        optim_flag    Can't remember.
 #' @param        quiet         BOOLEAN should dplyr progress bar be suppressed
 #'   (sideeffect).
 #'
 #' @importFrom   magrittr      %>%
-#' @importFrom   dplyr         bind_rows   group_by_   do
+#' @importFrom   dplyr         bind_rows   group_by   group_modify
+#' @importFrom   rlang         .data
 #'
 #' @export
 
@@ -257,7 +258,105 @@ multisymbol_to_entrez_ids <- function(
                                       entrezgene_db = NULL,
                                       split_character = "\\|",
                                       collapse_character = "|",
-                                      optim_flag = 1,
                                       quiet = TRUE) {
-  c()
+  old.op <- getOption("dplyr.show_progress")
+  if (quiet) {
+    options("dplyr.show_progress" = FALSE)
+  }
+
+  # Converts a vector of gene symbols (eg, HGNC symbols or genbank ids)
+  # to a vector of entrez ids
+  # The input is of the form ("NM_1234|NM_2345", "XP_0000", "NM_12345.1", ...)
+  #   and the output is of the form ("id1|id2|...", "id3|id4|...", ...)
+  #   where all ids to which any member of input[i] is mapped are
+  #   joined with the split_character and returned as output[i]
+  if (is.null(gene_symbols) | length(gene_symbols) == 0) {
+    return(character(0))
+  }
+  # split up the delimited gene symbols
+  gene_symbol_list <- strsplit(
+    x = gene_symbols,
+    split = split_character
+  )
+
+  gene_df_list <- Map(
+    function(i) {
+      if (length(gene_symbol_list[[i]]) == 0) {
+        gene.vec <- as.character(NA)
+      } else {
+        gene.vec <- unique(gene_symbol_list[[i]])
+      }
+      data.frame(
+        input.index = i,
+        input.symbols = gene.vec,
+        stringsAsFactors = FALSE
+      )
+    },
+    seq_along(gene_symbol_list)
+  )
+
+  # faster version than original:
+  # Combine all gene-symbol vectors into a large dataframe
+  #   - rbind_all(...) is faster than Reduce("rbind", ...) when
+  #     hundreds / thousands of dataframes are being combined:
+  multisymbol_df <- dplyr::bind_rows(gene_df_list)
+
+  # Map the symbols to their entrez-id counterpart
+  symbol_to_entrez <- symbol_to_entrez_id(
+    gene_symbols = multisymbol_df$input.symbols,
+    symbol_type = symbol_type,
+    entrezgene_db = entrezgene_db,
+    collapse_character = collapse_character
+  )
+
+  symbol_to_entrez <- data.frame(
+    input.index = factor(
+      multisymbol_df$input.index,
+      levels = seq_along(gene_symbol_list)
+    ),
+    input.symbols = multisymbol_df$input.symbols,
+    entrez.id = symbol_to_entrez,
+    stringsAsFactors = FALSE
+  )
+
+  # For each entry of gene_symbol_list, extract all entrez ids
+  # that map to any of the input symbols
+  collapse_func <- function(df) {
+    if (is.null(df) || nrow(df) == 0 || all(is.na(df$entrez.id))) {
+      return(
+        data.frame(
+          entrez.id = as.character(NA),
+          stringsAsFactors = FALSE
+        )
+      )
+    }
+    # split up any combinations of ids that might be returned by
+    #   symbol_to_entrez_id
+    # TODO: ? check whether collapse_character and split_character are
+    #   compatible ?
+    ids <- unique(unlist(strsplit(df$entrez.id, split = split_character)))
+    return(
+      data.frame(
+        entrez.id = paste(
+          sort(ids),
+          collapse = collapse_character
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+
+  delimited_entrez_id_df <- symbol_to_entrez %>%
+    dplyr::group_by(.data[["input.index"]]) %>%
+    dplyr::group_modify(~ collapse_func(.x)) %>%
+    as.data.frame()
+
+  delimited_entrez_id_vector <- delimited_entrez_id_df[, 2]
+
+  # revert dplyr settings
+  options("dplyr.show_progress" = old.op)
+
+  return(
+    delimited_entrez_id_vector
+  )
 }

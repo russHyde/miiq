@@ -6,8 +6,7 @@
 \usage{
 multisymbol_to_entrez_ids(gene_symbols = character(0),
   symbol_type = "SYMBOL", entrezgene_db = NULL,
-  split_character = "\\\\|", collapse_character = "|",
-  optim_flag = 1, quiet = TRUE)
+  split_character = "\\\\|", collapse_character = "|", quiet = TRUE)
 }
 \arguments{
 \item{gene_symbols}{vector of gene_symbols of a single type.}
@@ -22,8 +21,6 @@ symbols if any of the input entries contains more than one symbol.}
 
 \item{collapse_character}{character for collapsing entrez ids.}
 
-\item{optim_flag}{Can't remember.}
-
 \item{quiet}{BOOLEAN should dplyr progress bar be suppressed
 (sideeffect).}
 }
@@ -32,5 +29,5 @@ A function to map a vector of gene symbols to Entrez gene ids.
 The input may contain "multiple|joined|symbols", and if it does, the output
 for that entry will contain a "joined|string|of|ids" containing all of the
 unique values that any of the input symbols mapped to
-See symbol_to_entrez_id for further details
+See \code{symbol_to_entrez_id} for further details
 }
