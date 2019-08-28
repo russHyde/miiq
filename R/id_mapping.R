@@ -177,14 +177,14 @@ symbol_to_entrez_id <- function(
   }
 
   # At least one of the gene symbols must be a valid key
-  key.symbols <- intersect(
+  key_symbols <- intersect(
     gene_symbols,
     AnnotationDbi::keys(entrezgene_db, keytype = symbol_type)
   )
 
   # The function returns NA (string equivalent) for any input symbol
   # that cannot be mapped to an entrezgene id
-  if (is.null(key.symbols) | length(key.symbols) == 0) {
+  if (is.null(key_symbols) | length(key_symbols) == 0) {
     return(
       as.character(rep(NA, length(gene_symbols)))
     )
@@ -259,7 +259,7 @@ multisymbol_to_entrez_ids <- function(
                                       split_character = "\\|",
                                       collapse_character = "|",
                                       quiet = TRUE) {
-  old.op <- getOption("dplyr.show_progress")
+  old_op <- getOption("dplyr.show_progress")
   if (quiet) {
     options("dplyr.show_progress" = FALSE)
   }
@@ -281,14 +281,14 @@ multisymbol_to_entrez_ids <- function(
 
   gene_df_list <- Map(
     function(i) {
-      if (length(gene_symbol_list[[i]]) == 0) {
-        gene.vec <- as.character(NA)
+      gene_vec <- if (length(gene_symbol_list[[i]]) == 0) {
+        as.character(NA)
       } else {
-        gene.vec <- unique(gene_symbol_list[[i]])
+        unique(gene_symbol_list[[i]])
       }
       data.frame(
         input.index = i,
-        input.symbols = gene.vec,
+        input.symbols = gene_vec,
         stringsAsFactors = FALSE
       )
     },
@@ -354,7 +354,7 @@ multisymbol_to_entrez_ids <- function(
   delimited_entrez_id_vector <- delimited_entrez_id_df[, 2]
 
   # revert dplyr settings
-  options("dplyr.show_progress" = old.op)
+  options("dplyr.show_progress" = old_op)
 
   return(
     delimited_entrez_id_vector

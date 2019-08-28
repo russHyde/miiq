@@ -149,7 +149,7 @@ test_that("Mappings from SYMBOL to Entrez ids", {
   )
 })
 
-# ###############################################################################
+###############################################################################
 
 test_that("Mappings from Genbank id to Entrez.id", {
   test_df <- data.frame(
@@ -213,7 +213,7 @@ test_that("Mappings from Genbank id to Entrez.id", {
   )
 })
 
-# ###############################################################################
+###############################################################################
 
 # test_that("Different specifications of EntrezGene database", {
 #   expect_error(
@@ -495,7 +495,7 @@ test_that("Testing multisymbol mapper: Symbols to Entrez", {
   )
 })
 
-# ###############################################################################
+###############################################################################
 
 test_that("Testing multisymbol mapper: Ensembl to Entrez", {
   # Define data-frame as mock database for use in the tests
@@ -541,7 +541,7 @@ test_that("Testing multisymbol mapper: Ensembl to Entrez", {
   )
 })
 
-# ###############################################################################
+###############################################################################
 
 test_that("Testing multisymbol mapper: Genbank to Entrez", {
   # Define data-frame as mock database for use in the tests
