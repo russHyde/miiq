@@ -1,8 +1,4 @@
 ###############################################################################
-# Converted to testthat format from RUnit on 14/9/2016
-#
-#
-###############################################################################
 
 context("Tests for rh_microarray_functions.R")
 
@@ -1066,3 +1062,190 @@ test_that("Unit tests for filter_and_transform_eset", {
 })
 
 ###############################################################################
+
+###############################################################################
+
+test_that("add_entrez_ids_to_esets: validity of inputs", {
+
+  # - Should work using both an ExpressionSet and a list of ExpressionSets as
+  # input
+  # - All ExpressionSets should have a defined 'platform' and a defined
+  # 'featureData' slot (the latter containing at least one of RefSeq Transcript
+  # ID, GB_LIST or GB_ACC)
+  # - The list of ExpressionSets need not all have the same 'platform'
+
+  # If the input is NULL, the function should fail
+  expect_error(
+    add_entrez_ids_to_esets(),
+    info = "add_entrez_ids_to_esets fails if no input is provided"
+  )
+
+  expect_error(
+    add_entrez_ids_to_esets(esets = NULL),
+    info = "add_entrez_ids_to_esets fails on NULL input"
+  )
+
+  expect_error(
+    add_entrez_ids_to_esets(esets = list(NULL)),
+    info = "add_entrez_ids_to_esets fails on List-of-NULL inputs"
+  )
+
+  # If any of the inputs are not ExpressionSets, the function should fail
+  expect_error(
+    add_entrez_ids_to_esets(esets = "NOT AN ExpressionSet"),
+    info = "add_entrez_ids_to_esets fails if input is not an ExpressionSet"
+  )
+
+  # If the annotation slot is empty, the function should fail
+  # - note that Biobase::ExpressionSet can only take strings in the
+  # annotation(.) slot
+  #
+  eset_nullPlatform <- eset_empty
+  annotation(eset_nullPlatform) <- character(0)
+  expect_error(
+    add_entrez_ids_to_esets(esets = eset_nullPlatform),
+    info = paste("add_entrez_ids_to_esets fails if any ESet has an empty",
+                 "'annotation'")
+  )
+
+  eset_emptyPlatform <- eset_empty
+  annotation(eset_emptyPlatform) <- ""
+  expect_error(
+    add_entrez_ids_to_esets(esets = eset_emptyPlatform),
+    info = paste("add_entrez_ids_to_esets fails if any ESet has an empty",
+                 "'annotation'")
+  )
+
+  # If the featureData does not have a defined refseq column, the function
+  # should fail
+  # - implicitly tested via get_refseq_column
+  eset_noRefseqCol <- eset_empty
+  annotation(eset_noRefseqCol) <- "SOME PLATFORM"
+  featureData(eset_noRefseqCol) <- AnnotatedDataFrame(
+    data.frame(
+      "NOT A REFSEQ COLUMN" = character(0),
+      stringsAsFactors = FALSE
+    )
+  )
+  expect_error(
+    add_entrez_ids_to_esets(esets = eset_noRefseqCol),
+    info = paste(
+      "add_entrez_ids_to_esets fails unless all ESets have a valid ",
+      "refseq/genbank column"
+    )
+  )
+})
+
+test_that("add_entrez_ids_to_esets: correct outputs", {
+  # TODO: mock out the use of org.Hs.eg.db and org.Mm.eg.db
+
+  result_helper <- function(esets, db = org.Hs.eg.db::org.Hs.eg.db) {
+    res <- add_entrez_ids_to_esets(
+      esets = esets,
+      entrezgene.db = db
+    )
+    featureData(res)[["entrez.id"]]
+  }
+
+  # Logic tests (low level stuff is done by multisymbol_to_entrez_ids):
+  # Blank refseq entries, NA refseq entries should map to NA
+  eset_blankRefseqs <- eset_empty
+  annotation(eset_blankRefseqs) <- "SOME_OTHER_PLATFORM"
+  featureData(eset_blankRefseqs) <- AnnotatedDataFrame(
+    data.frame("GB_ACC" = c(NA, ""), stringsAsFactors = FALSE)
+  )
+  expect_blankRefseqs <- rep(as.character(NA), 2)
+  result_blankRefseqs <- result_helper(eset_blankRefseqs)
+  expect_equal(
+    expect_blankRefseqs,
+    result_blankRefseqs,
+    info = "NA and empty string should give NA entrez.ids"
+  )
+
+  # A single refseq entry that maps to a single human gene
+  eset_singleRefseq <- eset_empty
+  annotation(eset_singleRefseq) <- "platform.1"
+  featureData(eset_singleRefseq) <- AnnotatedDataFrame(
+    data.frame(
+      "GB_LIST" = "NM_000579", # CCR5/'1234'
+      stringsAsFactors = FALSE
+    )
+  )
+  expect_singleRefseq <- "1234"
+  result_singleRefseq <- result_helper(eset_singleRefseq)
+  expect_equal(
+    expect_singleRefseq,
+    result_singleRefseq,
+    info = "Single refseq id that maps to a single entrez id"
+  )
+
+  # A ' /// '-separated entry of refseq ids
+  eset_twoRefseq <- eset_empty
+  annotation(eset_twoRefseq) <- "GPL12345"
+  featureData(eset_twoRefseq) <- AnnotatedDataFrame(
+    data.frame(
+      "GB_LIST" = "NM_001307936 /// NM_018976",
+      stringsAsFactors = FALSE
+    )
+  )
+  expect_twoRefseq <- "54407"
+  result_twoRefseq <- result_helper(eset_twoRefseq)
+  expect_equal(
+    expect_twoRefseq,
+    result_twoRefseq,
+    info = "Two refseqs, ///-separated, that map to a single entrez id"
+  )
+
+  # A ','-separated entry of refseq ids
+  eset_commaRefseq <- eset_empty
+  annotation(eset_commaRefseq) <- "GPL9876"
+  featureData(eset_commaRefseq) <- AnnotatedDataFrame(
+    data.frame(
+      "GB_LIST" = "NM_001130045,NM_153254,BC126152",
+      stringsAsFactors = FALSE
+    )
+  )
+  expect_commaRefseq <- "254173"
+  result_commaRefseq <- result_helper(eset_commaRefseq)
+  expect_equal(
+    expect_commaRefseq,
+    result_commaRefseq,
+    info = "Comma-separated refseq list, that map to a single entrez id"
+  )
+
+  # refseq to entrez mapping for two different mouse probes:
+  eset_mouseRefseq <- eset_empty
+  annotation(eset_mouseRefseq) <- "GPL1261"
+  featureData(eset_mouseRefseq) <- AnnotatedDataFrame(
+    data.frame(
+      "RefSeq Transcript ID" = c("NM_017477 /// NM_201244", "NM_013477"),
+      stringsAsFactors = TRUE,
+      check.names = FALSE
+    )
+  )
+  expect_mouseRefseq <- c("54161", "11972")
+  result_mouseRefseq <- result_helper(eset_mouseRefseq,
+                                      org.Mm.eg.db::org.Mm.eg.db)
+  expect_equal(
+    expect_mouseRefseq,
+    result_mouseRefseq,
+    info = "refseq to entrez mapping for two mouse probes"
+  )
+  # Add entrez.ids to a swissprot-containing ESet
+  eset_swissprot <- eset_empty
+  annotation(eset_swissprot) <- "SOME GPL ID"
+  featureData(eset_swissprot) <- AnnotatedDataFrame(
+    data.frame(
+      "swissprot" = c(NA, "", "---", "ENST0000412115", "NR_046018",
+                      "NM_001005221"),
+      stringsAsFactors = FALSE
+    )
+  )
+  expect_swissprot <- c(NA, NA, NA, NA, "100287102", "729759")
+  result_swissprot <- result_helper(eset_swissprot)
+  expect_equal(
+    expect_swissprot,
+    result_swissprot,
+    info = "swissprot column can be mapped to Entrez ids"
+  )
+})

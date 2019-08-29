@@ -396,12 +396,192 @@ gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
 
 ###############################################################################
 
+#' Default function for annotating the ExpressionSet with additional info
+#'
+#' This just adds entrez.ids.
+#' Not exported.
+#' Not sure how to import entrezgene database (entrezgene.db.id) by name
+#'   when using \<AT\>import annotations.
+#'
+#' @param        geo.limma.dataset   A geo_limma_dataset.
+#' @param        gset          An ExpressionSet.
+#' @param        entrezgene.db.id   The id for the AnnotationDBI for use in
+#'   mapping to entrez ids.
+#'
+#' @importClassesFrom   AnnotationDbi   OrgDb
+#'
+gld_fnDefault_esetAnnotation <- function(
+  # nolint start
+  geo.limma.dataset = NULL,
+  gset = NULL,
+  entrezgene.db.id = NULL
+  # nolint end
+) {
+  # nolint start
+  geo_limma_dataset <- geo.limma.dataset
+  entrezgene_db_id <- entrezgene.db.id
+  # nolint end
+
+  # Function can either use geo_limma_datasets or
+  #   a combination of ExpressionSet and AnnotationDBI id
+  gset <- .check_or_get_eset(geo_limma_dataset, gset)
+
+  if (!is(entrezgene_db_id, "OrgDb")
+      &&
+      !is.character(entrezgene_db_id)
+  ) {
+    stopifnot(is(geo_limma_dataset, "geo_limma_dataset"))
+    entrezgene_db_id <- geo_limma_dataset@geo.config@entrezgene.db.id
+  }
+
+  # entrezgene.db.id is checked by symbol_to_entrez_id, so checking it"s
+  #   validity is unnecessary
+
+  # Function to annotate an ExpressionSet with entrez.ids
+  eset <- add_entrez_ids_to_esets(
+    gset,
+    entrezgene.db = entrezgene_db_id
+  )
+
+  return(eset)
+}
+
+###############################################################################
+
+#' Default function for transforming (etc) a microarray dataset
+#'
+#' Not exported
+#'
+#' @param        geo.limma.dataset   A geo_limma_dataset
+#' @param        gset          An ExpressionSet - used preferentially to
+#'   GLD@eset.
+#'
+#' @return       An ExpressionSet
+#'
+
+gld_fnDefault_transformAndProbeFilter <- function(
+  # nolint start
+  geo.limma.dataset = NULL,
+  # nolint end
+  gset = NULL) {
+  # nolint start
+  geo_limma_dataset <- geo.limma.dataset
+  # nolint end
+
+  gset <- .check_or_get_eset(geo_limma_dataset, gset)
+
+  # Determine if the imported ExpressionSet has already been
+  #   log-transformed
+  is_transformed <- check_if_pretransformed_eset(
+    eset = gset
+  )
+
+  # Transform (log2) and median-Normalise the dataset
+  # - also do some housekeeping:
+  #   - dropping identical rows;
+  #   - converting Inf to NA;
+  #   - dropping rows with many missing values;
+  # By default the array-wide median is subtracted, but the samples
+  #   are not divided by the IQR (default chagned 14/7/2016)
+  #   since IQR.normalisation affects the fold-changes
+  filter_and_transform_eset(
+    eset = gset,
+    log2_transform = !is_transformed,
+    drop_row_if_duplicated = TRUE,
+    convert_inf_to_na = TRUE,
+    normalise_method = "median",
+    drop_row_na_inf_threshold = 0.25
+  )
+}
+
+###############################################################################
+
+#' Workflow function for converting an ExpressionSet into an entrez.id
+#'   annotated ExpressionSet that has been log transformed / quantile
+#'   normalised and median-normalised. Probes that do not map to entrez.id are
+#'   dropped by default. All annotation / filtering functions can be overridden
+#'
+#' @param        gset          An ExpressionSet (must have genbank
+#'   ids or swissprot ids or similar for default annotation function).
+#' @param        entrezgene.db.id   character - Indicates which
+#'   AnnotationDbi object to use in the esetAnnotation function.
+#' @param        eset.annot.fn   Function that annotates an input
+#'   ExpressionSet and outputs an ExpressionSet.
+#' @param        keep.sample.fn   Function that returns integer
+#'   indices of samples (cols) of the ExpressionSet that are to be kept.
+#' @param        transform.and.filter.fn   Function that applies various
+#'   filtering / transformation steps to the values in the input ExpressionSet
+#'   and returns an ExpressionSet
+#' @param        keep.probe.fn   Function that returns integer
+#'   indices of probes (rows) of the ExpressionSet that are to be kept.
+#'
+#' @return       An ExpressionSet
+#'
+#' @importFrom   magrittr      %>%
+#' @importClassesFrom   Biobase   ExpressionSet
+#'
+#' @export
+#'
+preprocess_eset_workflow <- function(
+  # nolint start
+  gset = NULL,
+  entrezgene.db.id = NULL,
+  eset.annot.fn =
+    gld_fnDefault_esetAnnotation,
+  keep.sample.fn =
+    gld_fnDefault_keepSample,
+  transform.and.filter.fn =
+    gld_fnDefault_transformAndProbeFilter,
+  keep.probe.fn =
+    gld_fnDefault_keepProbe
+  # nolint end
+) {
+  # nolint start
+  # TODO: rename the input arguments to match the lint-free versions below
+  eg_db <- entrezgene.db.id
+  eset_annot_fn <- eset.annot.fn
+  keep_probe_fn <- keep.probe.fn
+  keep_sample_fn <- keep.sample.fn
+  transform_and_filter_fn <- transform.and.filter.fn
+  # nolint end
+
+  # validity checks
+  stopifnot(is(gset, "ExpressionSet"))
+  # the entrezgene.db will be checked in Entrez-annotation functions
+  if (is.null(eg_db)) {
+    stop("No entrezgene.db.id provided in preprocess_eset_workflow")
+  }
+
+  lambda_sample_filter <- function(gset) {
+    keep_samples <- keep_sample_fn(gset = gset)
+    gset[, keep_samples]
+  }
+
+  lambda_probe_filter <- function(gset) {
+    keep_probes <- keep_probe_fn(gset = gset)
+    gset[keep_probes, ]
+  }
+  # eset annotation
+  annotated_eset <- eset_annot_fn(
+    gset = gset,
+    entrezgene.db.id = eg_db
+  )
+
+  # sample filtering
+  # transform and filter probes
+  # probe filtering
+  transform_and_filter_fn(
+    gset = lambda_sample_filter(annotated_eset)
+  ) %>%
+    lambda_probe_filter()
+
+  # return the modified eset
+}
+
 # TODO: add tests / classes / functions:
 # - geo_config, geo_limma_dataset, limma_config
 # - decideTests_gld, eset<-,
-# - limma_workflow, preprocess_eset_workflow
-# - gld_fnDefault_esetAnnotation
-# - gld_fnDefault_transformAndProbeFilter
+# - limma_workflow
 # - gld_fnBuilder_exptContrasts
 # - gld_fnBuilder_exptContrasts_fromList
 
