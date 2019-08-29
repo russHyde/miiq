@@ -37,6 +37,39 @@ same as using new() constructor. Modulo function-name vs function."
 
   # TODO: check default values - gpl_acc   = as.character(NA)
   #                            - annot_gpl = as.logical(NA)
+
+  valid_arguments <- list(
+    acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+    dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
+  )
+  invalid_arguments <- list(
+    # dest dir must be a real dir
+    list(dest_dir = "NOT A DIRECTORY"),
+    # only a single database is allowed
+    list(database = c("geo", "geo")),
+    # database must be either geo or aryx
+    list(database = "NOT A DATABASE"),
+    # only a single accession is allowed
+    list(acc = c("GSE1234", "GSE9876")),
+    # not every function is a valid download-function
+    list(dl_func_name = "c"),
+    # for ArrayExpress, the Accession number should be "E-MTAB-..."
+    list(database = "aryx", acc = "NOT AN ARRAY EXPRESS ACC")
+  )
+
+  for (replacements in invalid_arguments) {
+    test_args <- valid_arguments
+    test_args[names(replacements)] <- replacements
+
+    expect_error(
+      object = do.call(
+        MicroarrayDownloadConfig, test_args
+      ),
+      info = paste(
+        "invalid arguments in `MicroarrayDownloadConfig`: ", replacements
+      )
+    )
+  }
 })
 
 ###############################################################################

@@ -31,30 +31,32 @@ NULL
 
 .check_marray_dl_config <- function(
                                     object) {
-  errors <- character()
+  cls <- "MicroarrayDownloadConfig"
+
+  err_msg <- function(x) {
+    paste0(cls, ": ", x)
+  }
 
   db <- object@database
   if (length(db) != 1) {
-    errors <- c(errors, "dl_database should be of length 1")
+    return(err_msg("`dl_database` should be of length 1"))
   }
   if (!(db %in% c("geo", "aryx"))) {
-    errors <- c(errors, "dl_database should be one of 'geo' or 'aryx'")
+    return(err_msg("`dl_database` should be one of `geo` or `aryx`"))
   }
 
   acc <- object@acc
   if (length(acc) != 1) {
-    errors <- c(errors, "dl_acc should be of length 1")
+    return(err_msg("`dl_acc` should be of length 1"))
   }
   if (db == "geo" && !.is_gse_acc(acc)) {
-    errors <- c(
-      errors,
-      "`dl_acc` should be a 'GSExxx' id if `dl_database` is 'geo'"
+    return(
+      err_msg("`dl_acc` should be a 'GSExxx' ID is `dl_database` is `geo`")
     )
   }
   if (db == "aryx" && !.is_aryx_acc(acc)) {
-    errors <- c(
-      errors,
-      "`dl_acc` should be 'E-MTAB-XXXX' if `dl_database` is 'aryx'"
+    return(
+      err_msg("`dl_acc` should be `E-MTAB-xxxx` if `dl_database` is `aryx`")
     )
   }
 
@@ -64,39 +66,34 @@ NULL
   # - acc and dest_dir should be the only args
   dl_method <- object@dl_method
   if (!all.equal(c("acc", "dest_dir"), names(formals(dl_method))[1:2])) {
-    errors <- c(
-      errors,
-      "acc and dest_dir should be the first args to dl_method"
+    return(
+      err_msg("`acc` and `dest_dir` should be the first args to `dl_method`")
     )
   }
 
   dest_dir <- object@dest_dir
   if (length(dest_dir) != 1 || !dir.exists(dest_dir)) {
-    errors <- c(
-      errors,
-      "dl_dest_dir should be of length1 and an existing dir"
+    return(
+      err_msg("`dl_dest_dir` should be of length 1 and an existing dir")
     )
   }
 
   # TODO: Allow NA gpl values for raw-data downloads?
   gpl <- object@gpl_acc
   if (length(gpl) != 1 || !.is_gpl_acc(gpl)) {
-    errors <- c(
-      errors,
-      "gpl_acc should be of length1 and a GPLxxx accession number"
+    return(
+      err_msg("`gpl_acc` should be of length 1 and a GPLxxx accession number")
     )
   }
 
   annot_gpl <- object@annot_gpl
   if (length(annot_gpl) != 1) {
-    errors <- c(errors, "annot_gpl should be of length1")
+    return(
+      err_msg("`annot_gpl` should be of length 1")
+    )
   }
 
-  if (length(errors) == 0) {
-    TRUE
-  } else {
-    errors
-  }
+  TRUE
 }
 
 ###############################################################################
@@ -133,7 +130,7 @@ methods::setMethod(
 #
 methods::setValidity(
   Class = "MicroarrayDownloadConfig",
-  method = .check_marray_dl_config
+  method = function(object) .check_marray_dl_config(object)
 )
 
 ###############################################################################
