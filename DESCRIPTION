@@ -43,6 +43,6 @@ Collate:
     'id_mapping.R'
     'microarray_classes.R'
     'import_classes.R'
-    'import_funcs.R'
+    'import_functions.R'
     'vector_manipulation.R'
     'microarray_functions.R'
