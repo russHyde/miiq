@@ -25,7 +25,7 @@ Imports:
     preprocessCore,
     stringr,
     AnnotationDbi,
-    dplyr,
+    dplyr (>= 0.8.1),
     rlang,
     ArrayExpress,
     GEOquery,
