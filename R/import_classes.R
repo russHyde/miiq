@@ -79,12 +79,12 @@ methods::setMethod(
       unlist()
   }
 
-  featureData(gset)$entrez.id <- split_and_join(
-    featureData(gset)$`Gene ID`
+  Biobase::featureData(gset)$entrez.id <- split_and_join(
+    Biobase::featureData(gset)$`Gene ID`
   )
 
-  featureData(gset)$symbol <- split_and_join(
-    featureData(gset)$`Gene symbol`
+  Biobase::featureData(gset)$symbol <- split_and_join(
+    Biobase::featureData(gset)$`Gene symbol`
   )
 
   gset
