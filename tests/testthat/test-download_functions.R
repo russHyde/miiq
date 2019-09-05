@@ -4,6 +4,48 @@ context("Tests for downloading of GEO and ArrayExpress Datasets")
 
 ###############################################################################
 
+# Some test data - xml, as returned by eutils searches
+
+xml_nonexistent_uid <- '<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
+"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
+<eSummaryResult>
+<ERROR>UID=200999999: cannot get document summary</ERROR>
+
+</eSummaryResult>'
+
+xml_200031365 <- '<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
+"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
+<eSummaryResult>
+<DocSum>
+    <Id>200031365</Id>
+    <Item Name="Accession" Type="String">GSE31365</Item>
+    <Item Name="GPL" Type="String">6244</Item>
+    <Item Name="GSE" Type="String">31365</Item>
+</DocSum>
+</eSummaryResult>'
+
+xml_two_entries <- '<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
+"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
+<eSummaryResult>
+<DocSum>
+    <Id>200031365</Id>
+    <Item Name="Accession" Type="String">GSE31365</Item>
+    <Item Name="GPL" Type="String">6244</Item>
+    <Item Name="GSE" Type="String">31365</Item>
+</DocSum>
+<DocSum>
+    <Id>200011578</Id>
+    <Item Name="Accession" Type="String">GSE11578</Item>
+    <Item Name="GPL" Type="String">571</Item>
+    <Item Name="GSE" Type="String">11578</Item>
+</DocSum>
+</eSummaryResult>'
+
+###############################################################################
+
 test_that(".is_gpl_acc", {
   expect_true(
     .is_gpl_acc("GPL12345"),
@@ -143,77 +185,6 @@ test_that(".is_gds_uid", {
 
 #' @importFrom   tibble        tibble
 #'
-test_that(".parse_gds_to_gpl", {
-
-  # No entries
-  xml <- '<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
-"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
-<eSummaryResult>
-<ERROR>UID=200999999: cannot get document summary</ERROR>
-
-</eSummaryResult>'
-  expect_error(
-    object = .parse_gds_to_gpl(xml),
-    info = "Valid GDS xml, but there's no entries inside it"
-  )
-
-  # Single entry
-  xml <- '<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
-"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
-<eSummaryResult>
-<DocSum>
-    <Id>200031365</Id>
-    <Item Name="Accession" Type="String">GSE31365</Item>
-    <Item Name="GPL" Type="String">6244</Item>
-    <Item Name="GSE" Type="String">31365</Item>
-</DocSum>
-</eSummaryResult>'
-  expect <- tibble::tibble(
-    uid = "200031365",
-    gse = "GSE31365",
-    gpl = "GPL6244"
-  )
-  expect_equal(
-    object = .parse_gds_to_gpl(xml),
-    expected = expect,
-    info = "Valid GDS xml, and valid map from GSE to GPL for a single
- dataset"
-  )
-
-  # Two entries
-  xml <- '<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE eSummaryResult PUBLIC "-//NLM//DTD esummary v1 20041029//EN"
-"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20041029/esummary-v1.dtd">
-<eSummaryResult>
-<DocSum>
-    <Id>200031365</Id>
-    <Item Name="Accession" Type="String">GSE31365</Item>
-    <Item Name="GPL" Type="String">6244</Item>
-    <Item Name="GSE" Type="String">31365</Item>
-</DocSum>
-<DocSum>
-    <Id>200011578</Id>
-    <Item Name="Accession" Type="String">GSE11578</Item>
-    <Item Name="GPL" Type="String">571</Item>
-    <Item Name="GSE" Type="String">11578</Item>
-</DocSum>
-</eSummaryResult>'
-  expect <- tibble::tibble(
-    uid = c("200031365", "200011578"),
-    gse = c("GSE31365", "GSE11578"),
-    gpl = c("GPL6244", "GPL571")
-  )
-  expect_equal(
-    object = .parse_gds_to_gpl(xml),
-    expected = expect,
-    info = "Valid GDS xml, and valid map from GSE to GPL for a two
-datasets"
-  )
-})
-
-###############################################################################
 test_that("dl_gds_to_gpl", {
   expect_equal(
     object = dl_gds_to_gpl(character(0)),
@@ -228,24 +199,39 @@ test_that("dl_gds_to_gpl", {
     info = "Invalid GDS uid passed to .dl_gds_to_gpl"
   )
 
-  expect_equal(
-    object = dl_gds_to_gpl("200011578"),
-    expected = tibble::tibble(
-      uid = "200011578",
-      gse = "GSE11578",
-      gpl = "GPL571"
-    ),
-    info = "Single GDS uid, mapped to a GPL id"
+
+  testthat::with_mock(
+    "RCurl::getURL" = function(...) xml_nonexistent_uid,
+    expect_error(
+      object = dl_gds_to_gpl("200999999"),
+      info = "An error is thrown if a non-existent dataset is requested")
+
   )
 
-  expect_equal(
-    object = dl_gds_to_gpl(c("200011578", "200031365")),
-    expected = tibble::tibble(
-      uid = c("200011578", "200031365"),
-      gse = c("GSE11578", "GSE31365"),
-      gpl = c("GPL571", "GPL6244")
-    ),
-    info = "Single GDS uid, mapped to a GPL id"
+  testthat::with_mock(
+    "RCurl::getURL" = function(...) xml_200031365,
+    expect_equal(
+      object = dl_gds_to_gpl("200031365"),
+      expected = tibble::tibble(
+        uid = "200031365",
+        gse = "GSE31365",
+        gpl = "GPL6244"
+      ),
+      info = "Single GDS uid, mapped to a GPL id"
+    )
+  )
+
+  testthat::with_mock(
+    "RCurl::getURL" = function(...) xml_two_entries,
+    expect_equal(
+      object = dl_gds_to_gpl(c("200031365", "200011578")),
+      expected = tibble::tibble(
+        uid = c("200031365", "200011578"),
+        gse = c("GSE31365", "GSE11578"),
+        gpl = c("GPL6244", "GPL571")
+      ),
+      info = "Single GDS uid, mapped to a GPL id"
+    )
   )
 })
 
