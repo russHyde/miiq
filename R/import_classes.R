@@ -1,5 +1,4 @@
 ###############################################################################
-# 2017-07-11
 #
 ##############################################################################
 
@@ -59,39 +58,6 @@ methods::setMethod(
 
 ###############################################################################
 
-#' @importFrom   magrittr      %>%
-#' @importFrom   Biobase       featureData
-#' @importFrom   purrr         map
-#' @importFrom   stringr       str_replace_all
-#'
-.add_entrez_columns_if_gset_has_annotgpl <- function(
-                                                     gset,
-                                                     # nolint start
-                                                     entrezgene.db.id
-                                                     # nolint end
-                                                   ) {
-  split_and_join <- function(xs) {
-    stringr::str_replace_all(xs, "///", "|") %>%
-      strsplit("\\|") %>%
-      purrr::map(unique) %>%
-      purrr::map(sort) %>%
-      purrr::map(function(x) paste(x, collapse = "|")) %>%
-      unlist()
-  }
-
-  Biobase::featureData(gset)$entrez.id <- split_and_join(
-    Biobase::featureData(gset)$`Gene ID`
-  )
-
-  Biobase::featureData(gset)$symbol <- split_and_join(
-    Biobase::featureData(gset)$`Gene symbol`
-  )
-
-  gset
-}
-
-###############################################################################
-
 # TODO: setValidity
 # - 1st arg to import_method should be 'mic'
 
@@ -137,83 +103,6 @@ methods::setMethod(
     # necessary
     correcter <- config@normalise_method
     correcter(initial_marray)
-  }
-)
-
-###############################################################################
-
-#' Generic for the method 'run_annotate_and_preprocess_workflow'
-#'
-#' @docType      methods
-#' @name         run_annotate_and_preprocess_workflow
-#' @rdname       run_annotate_and_preprocess_workflow-methods
-#'
-#' @export
-#'
-
-methods::setGeneric(
-  "run_annotate_and_preprocess_workflow",
-  function(
-           eset, config, entrezgene_db_id) {
-    standardGeneric("run_annotate_and_preprocess_workflow")
-  }
-)
-
-#' run_annotate_and_preprocess_workflow for ExpressionSet and
-#'   MicroarrayImportConfig
-#'
-#' @name         run_annotate_and_preprocess_workflow
-#' @rdname       run_annotate_and_preprocess_workflow-methods
-#' @aliases      run_annotate_and_preprocess_workflow,ExpressionSet,MicroarrayImportConfig,character-method
-#'
-#' @include      microarray_classes.R
-#' @include      gld.R
-#'
-#' @export
-#'
-
-methods::setMethod(
-  f = "run_annotate_and_preprocess_workflow",
-  signature = methods::signature(
-    eset = "ExpressionSet",
-    config = "MicroarrayImportConfig",
-    entrezgene_db_id = "character"
-  ),
-  definition = function(
-                        eset,
-                        config,
-                        entrezgene_db_id) {
-    # Annotate the features in the ExpressionSet
-    gpl_annotated_marray <- if (
-      !is.na(config@gpl_dir) && !is.na(config@gpl_files)
-    ) {
-      gpl <- import_gpl(config@gpl_files, config@gpl_dir)
-      add_gpl_to_eset(eset, gpl)
-    } else {
-      eset
-    }
-
-    #
-    entrez_adder <- if (config@annot_gpl) {
-      # The gpl dataset contains Entrez Id and gene-symbol columns already
-      # We only need to reformat them and add them back to the featureData
-      # of the expressionSet
-      .add_entrez_columns_if_gset_has_annotgpl
-    } else {
-      # Use the default esetAnnotation function defined in drug.markers
-      # package
-      gld_fnDefault_esetAnnotation
-    }
-
-    # Run preprocess_eset_workflow to add consistent entrez.id column and to
-    # transform and median-centre the data, if necessary
-    preprocess_eset_workflow(
-      gset = gpl_annotated_marray,
-      entrezgene.db.id = entrezgene_db_id,
-      eset.annot.fn = entrez_adder,
-      keep.sample.fn = get_keep_sample_function(config@acc),
-      keep.probe.fn = keep_probe_fn
-    )
   }
 )
 
