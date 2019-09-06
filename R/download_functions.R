@@ -1,5 +1,5 @@
 ###############################################################################
-# 2017-06-28
+#
 # Functions for downloading / importing datasets from GEO and ArrayExpress
 # - For meta_analysis subproject of drug_markers project
 #
