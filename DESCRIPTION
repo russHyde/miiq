@@ -36,6 +36,7 @@ Imports:
     oligo,
     oligoClasses
 Collate:
+    'utils.R'
     'list_manipulation.R'
     'download_functions.R'
     'download_classes.R'

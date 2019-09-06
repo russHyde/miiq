@@ -204,6 +204,8 @@ methods::setMethod(
 #' @param        annot_gpl     Should the NCBI-embellished platform annotation
 #'   data be downloaded?
 #'
+#' @include      utils.R
+#'
 #' @export
 #'
 
@@ -220,7 +222,7 @@ MicroarrayDownloadConfig <- function(
     "MicroarrayDownloadConfig",
     acc = acc,
     database = database,
-    dl_method = get(dl_func_name),
+    dl_method = .get_from_env(dl_func_name),
     dest_dir = dest_dir,
     gpl_acc = gpl_acc,
     annot_gpl = annot_gpl
