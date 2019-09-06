@@ -319,15 +319,15 @@ swissprot_column_to_refseq <- function(swiss) {
 #'
 
 add_entrez_ids_to_esets <- function(
-  esets,
-  entrezgene.db) {
+                                    esets,
+                                    entrezgene.db) {
   check_valid_eset <- function(eset) {
     if (is.null(eset) || !is(eset, "ExpressionSet")) {
       stop("Each input to 'esets' should be a valid ExpressionSet")
     }
     if (length(Biobase::annotation(eset)) != 1 ||
-        nchar(Biobase::annotation(eset)) == 0
-        ) {
+      nchar(Biobase::annotation(eset)) == 0
+    ) {
       stop(paste(
         "'annotation' slot for each 'eset'",
         "should be a single nonempty string"
@@ -350,39 +350,38 @@ add_entrez_ids_to_esets <- function(
   }
 
   # Obtain a data.frame from an ExpressionSet
-  # The input.ids in the data.frame are the raw entries in a refseq-containing
+  # The input_ids in the data.frame are the raw entries in a refseq-containing
   #   column in the featureData (input may contain additional id types)
   # The refseq.ids are a vector of comma-separated refseq ids parsed from out
-  #   of the input.ids
+  #   of the input_ids
   #
-  get_input_to_refseq_df <- function(
-    eset) {
+  get_input_to_refseq_df <- function(eset) {
     fd <- Biobase::featureData(eset)
 
     if (has_refseq_column(eset)) {
       rsc <- get_refseq_column(eset)
-      input.ids <- fd[[rsc]]
-      refseq.ids <- gsub(" /// ", ",", input.ids)
+      input_ids <- fd[[rsc]]
+      refseq_ids <- gsub(" /// ", ",", input_ids)
     } else if ("swissprot" %in% colnames(fd)) {
-      input.ids <- fd[["swissprot"]]
-      refseq.ids <- swissprot_column_to_refseq(input.ids)
+      input_ids <- fd[["swissprot"]]
+      refseq_ids <- swissprot_column_to_refseq(input_ids)
     } else {
       stop("No refseq/swissprot column for the current eset")
     }
 
     # A row is present for every row in the input eset,
-    # The input.ids may be NA, '' or '---'
+    # The input_ids may be NA, '' or '---'
     # The refseq.ids are comma-separated
     data.frame(
-      input.ids = input.ids,
-      refseq.ids = refseq.ids,
+      input_ids = input_ids,
+      refseq_ids = refseq_ids,
       stringsAsFactors = FALSE
     )
   }
   # Generate a map from input.id to entrez.id for each platform in the esets
   get_input_to_entrez_map <- function(plat) {
 
-    # Get mappings from input.ids to refseq.ids for each ESet on this platform
+    # Get mappings from input_ids to refseq.ids for each ESet on this platform
     platform_dfs <- Map(
       get_input_to_refseq_df,
       Filter(
@@ -398,17 +397,17 @@ add_entrez_ids_to_esets <- function(
 
     # Get the entrez id(s) corresponding to each entry in platform.df
     entrez_ids <- multisymbol_to_entrez_ids(
-      gene_symbols = platform_df[, "refseq.ids"],
+      gene_symbols = platform_df[, "refseq_ids"],
       symbol_type = "REFSEQ",
       entrezgene_db = entrezgene.db,
       split_character = ",",
       collapse_character = "|"
     )
 
-    # return a map containing input.ids, refseq.ids and entrez.ids
+    # return a map containing input_ids, refseq.ids and entrez_ids
     data.frame(
       platform_df,
-      entrez.ids = entrez_ids,
+      entrez_ids = entrez_ids,
       stringsAsFactors = FALSE
     )
   }
@@ -418,24 +417,24 @@ add_entrez_ids_to_esets <- function(
     unlist() %>%
     unique()
 
-  # Map from input.ids to entrez.ids for each platform
+  # Map from input_ids to entrez_ids for each platform
   entrez_id_maps <- Map(
     get_input_to_entrez_map,
     platforms
   )
   esets <- lapply(esets, function(es) {
-    input.ids <- get_input_to_refseq_df(es)[, "input.ids"]
+    input_ids <- get_input_to_refseq_df(es)[, "input_ids"]
     plat <- Biobase::annotation(es)
-    rows_to_update <- which(!is.na(input.ids) & input.ids != "")
-    row.order <- match(
-      input.ids[rows_to_update],
-      entrez_id_maps[[plat]]$input.ids
+    rows_to_update <- which(!is.na(input_ids) & input_ids != "")
+    row_order <- match(
+      input_ids[rows_to_update],
+      entrez_id_maps[[plat]]$input_ids
     )
-    es.entrezid <- rep(as.character(NA), nrow(Biobase::featureData(es)))
-    es.entrezid[rows_to_update] <- entrez_id_maps[[plat]][
-      row.order, "entrez.ids"
-      ]
-    Biobase::featureData(es)$entrez.id <- es.entrezid
+    es_entrez_id <- rep(as.character(NA), nrow(Biobase::featureData(es)))
+    es_entrez_id[rows_to_update] <- entrez_id_maps[[plat]][
+      row_order, "entrez_ids"
+    ]
+    Biobase::featureData(es)$entrez.id <- es_entrez_id
     return(es)
   })
 

@@ -7,7 +7,9 @@
 #' @export
 #'
 keep_probe_fn <- function(
+  # nolint start
                           geo.limma.dataset = NULL,
+                          # nolint end
                           gset = NULL) {
   # TODO: rewrite to use `geo_limma_dataset` as argname
   # TODO: unit tests
