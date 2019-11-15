@@ -22,8 +22,13 @@ NULL
 
 #############################################################################
 
-# Class definition for MicroarrayImportConfig
-#
+#' Class definition for MicroarrayImportConfig
+#'
+#' @name         MicroarrayImportConfig-class
+#' @rdname       MicroarrayImportConfig-class
+#'
+#' @exportClass   MicroarrayImportConfig
+#'
 methods::setClass(
   Class = "MicroarrayImportConfig",
   slots = list(
