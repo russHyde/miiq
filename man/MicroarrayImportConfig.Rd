@@ -15,11 +15,17 @@ MicroarrayImportConfig(acc, import_method, normalise_method,
   annot_gpl = as.logical(NA))
 }
 \arguments{
-\item{acc}{ABC}
+\item{acc}{An identifier for the microarray dataset.
+Typically this would be the GEO or ArrayExpress identifier.}
 
-\item{import_method}{DEF}
+\item{import_method}{Either a function or the name of a function
+to be used for importing the microarray files into R. The function-name
+can either be specified in "function_name" (if the function is defined in
+the calling environment) or "pkg_name::function_name".}
 
-\item{normalise_method}{FED}
+\item{normalise_method}{Either a function or the name of a function
+to be used for normalising the imported microarray data. The function-name
+can be provided in "function_name" or "pkg_name::function_name" format.}
 
 \item{raw_dir}{GHI}
 

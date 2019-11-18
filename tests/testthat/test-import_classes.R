@@ -44,6 +44,26 @@ test_that("MicroarrayImportConfig: constructor", {
     ),
     info = "MicroarrayImportConfig() must have normalise_method defined"
   )
+
+  expect_equal(
+    object = MicroarrayImportConfig(
+      acc = "GSE1234",
+      import_method = "miiq::import_geo_processed",
+      normalise_method = identity
+    )@import_method,
+    expected = miiq::import_geo_processed,
+    info = "Import method can be specified using pkg::fn syntax"
+  )
+
+  expect_equal(
+    object = MicroarrayImportConfig(
+      acc = "GSE1234",
+      import_method = "miiq::import_geo_processed",
+      normalise_method = "base::identity"
+    )@normalise_method,
+    expected = identity,
+    info = "Normalise method can be specified using pkg::fn syntax"
+  )
 })
 
 ###############################################################################
