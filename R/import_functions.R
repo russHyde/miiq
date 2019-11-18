@@ -41,6 +41,7 @@ import_gpl <- function(
 #' @importFrom   Biobase       featureData<-
 #' @importFrom   GEOquery      Columns   Table
 #' @importFrom   methods       is
+#' @importFrom   utils         head
 #'
 add_gpl_to_eset <- function(
                             eset,
@@ -49,12 +50,15 @@ add_gpl_to_eset <- function(
   stopifnot(methods::is(gpl_data, "GPL"))
 
   gpl_table <- GEOquery::Table(gpl_data)
-  stopifnot(all(rownames(eset) %in% gpl_table[, "ID"]))
+  stopifnot("ID" %in% colnames(gpl_table))
+  if(!all(rownames(eset) %in% gpl_table[["ID"]])) {
+    stop(
+      "IDs in `eset` but not `gpl_table`: ",
+      utils::head(setdiff(rownames(eset), gpl_table[["ID"]]))
+    )
+  }
 
-  annot_ord <- match(
-    rownames(eset),
-    gpl_table[, "ID"]
-  )
+  annot_ord <- match(rownames(eset), gpl_table[["ID"]])
 
   fd <- new(
     "AnnotatedDataFrame",

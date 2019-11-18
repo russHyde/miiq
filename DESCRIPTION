@@ -34,7 +34,8 @@ Imports:
     purrr,
     tibble,
     oligo,
-    oligoClasses
+    oligoClasses,
+    utils
 Collate:
     'utils.R'
     'list_manipulation.R'
