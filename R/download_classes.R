@@ -192,15 +192,15 @@ methods::setMethod(
 #' and/or ArrayExpress
 #'
 #' @param        acc           An accession number for use at GEO or
-#'   ArrayExpress
+#'   ArrayExpress.
 #' @param        database      The name of the database from which the dataset
-#'   should be downloaded
-#' @param        dl_func_name   The name of a function for downloading the
-#'   required dataset
+#'   should be downloaded.
+#' @param        download_method   Either a function (or the name of a
+#'   function) for downloading the required dataset.
 #' @param        dest_dir      The directory within which the dataset should be
-#'   saved
+#'   saved.
 #' @param        gpl_acc       The accession number for any relevant GPL
-#'   annotation data from GEO
+#'   annotation data from GEO.
 #' @param        annot_gpl     Should the NCBI-embellished platform annotation
 #'   data be downloaded?
 #'
@@ -209,20 +209,22 @@ methods::setMethod(
 #' @export
 #'
 
-# nolint start
 MicroarrayDownloadConfig <- function(
-                                     # nolint end
                                      acc,
                                      database,
-                                     dl_func_name,
+                                     download_method,
                                      dest_dir = tempdir(),
                                      gpl_acc = as.character(NA),
                                      annot_gpl) {
+  if (is.character(download_method)) {
+    download_method <- .get_from_env(download_method)
+  }
+
   new(
     "MicroarrayDownloadConfig",
     acc = acc,
     database = database,
-    dl_method = .get_from_env(dl_func_name),
+    dl_method = download_method,
     dest_dir = dest_dir,
     gpl_acc = gpl_acc,
     annot_gpl = annot_gpl

@@ -5,24 +5,24 @@
 \title{Sets up a class for storing the options for downloading datasets from GEO
 and/or ArrayExpress}
 \usage{
-MicroarrayDownloadConfig(acc, database, dl_func_name,
+MicroarrayDownloadConfig(acc, database, download_method,
   dest_dir = tempdir(), gpl_acc = as.character(NA), annot_gpl)
 }
 \arguments{
 \item{acc}{An accession number for use at GEO or
-ArrayExpress}
+ArrayExpress.}
 
 \item{database}{The name of the database from which the dataset
-should be downloaded}
+should be downloaded.}
 
-\item{dl_func_name}{The name of a function for downloading the
-required dataset}
+\item{download_method}{Either a function (or the name of a
+function) for downloading the required dataset.}
 
 \item{dest_dir}{The directory within which the dataset should be
-saved}
+saved.}
 
 \item{gpl_acc}{The accession number for any relevant GPL
-annotation data from GEO}
+annotation data from GEO.}
 
 \item{annot_gpl}{Should the NCBI-embellished platform annotation
 data be downloaded?}
