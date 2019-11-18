@@ -15,7 +15,7 @@ test_that("MicroarrayDownloadConfig: constructor", {
   # Using constructor function, with all args provided
   expect_s4_class(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
     class = "MicroarrayDownloadConfig"
@@ -23,7 +23,7 @@ test_that("MicroarrayDownloadConfig: constructor", {
 
   expect_equal(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
     expected = new(
@@ -39,7 +39,7 @@ same as using new() constructor. Modulo function-name vs function."
   #                            - annot_gpl = as.logical(NA)
 
   valid_arguments <- list(
-    acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+    acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
     dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
   )
   invalid_arguments <- list(
@@ -52,7 +52,7 @@ same as using new() constructor. Modulo function-name vs function."
     # only a single accession is allowed
     list(acc = c("GSE1234", "GSE9876")),
     # not every function is a valid download-function
-    list(dl_func_name = "c"),
+    list(download_method = "c"),
     # for ArrayExpress, the Accession number should be "E-MTAB-..."
     list(database = "aryx", acc = "NOT AN ARRAY EXPRESS ACC")
   )
@@ -79,7 +79,7 @@ test_that("MicroarrayDownloadConfig: validation", {
   # If database is 'geo' then accession-number should be a GSE accession:
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "not-a-gse-acc", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "not-a-gse-acc", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
     info = "If database is geo, then accession should be GSE*"
@@ -88,7 +88,7 @@ test_that("MicroarrayDownloadConfig: validation", {
   # If gpl_acc is given, it should be a GPL* accession number:
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "not-a-gpl", annot_gpl = TRUE
     ),
     info = "If gpl_acc is given it should be of the form GPL*"
@@ -97,16 +97,16 @@ test_that("MicroarrayDownloadConfig: validation", {
   # If gpl_acc is given, it should be a GPL* accession number:
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "not_a_function",
+      acc = "GSE123", database = "geo", download_method = "not_a_function",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
-    info = "dl_func_name should correspond to a defined function"
+    info = "download_method should correspond to a defined function"
   )
 
   # annot_gpl should be a single logical value:
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = "not_logical"
     ),
     info = "annot_gpl should be a logical value"
@@ -114,7 +114,7 @@ test_that("MicroarrayDownloadConfig: validation", {
 
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "dl_geo_raw",
+      acc = "GSE123", database = "geo", download_method = "dl_geo_raw",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = c(TRUE, FALSE)
     ),
     info = "annot_gpl should be a single logical value"
@@ -122,10 +122,10 @@ test_that("MicroarrayDownloadConfig: validation", {
 
   expect_error(
     object = MicroarrayDownloadConfig(
-      acc = "GSE123", database = "geo", dl_func_name = "identity",
+      acc = "GSE123", database = "geo", download_method = "identity",
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
-    info = "args to the function refered by dl_func_name should take 'acc'
+    info = "args to the function refered by download_method should take 'acc'
 and 'dest_dir' as first two args."
   )
 })

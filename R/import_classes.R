@@ -116,9 +116,15 @@ methods::setMethod(
 #' Sets up a class for storing the options for importing datasets from GEO
 #' and/or ArrayExpress
 #'
-#' @param        acc           ABC
-#' @param        import_method   DEF
-#' @param        normalise_method   FED
+#' @param        acc           An identifier for the microarray dataset.
+#'   Typically this would be the GEO or ArrayExpress identifier.
+#' @param        import_method   Either a function or the name of a function
+#'   to be used for importing the microarray files into R. The function-name
+#'   can either be specified in "function_name" (if the function is defined in
+#'   the calling environment) or "pkg_name::function_name".
+#' @param        normalise_method   Either a function or the name of a function
+#'   to be used for normalising the imported microarray data. The function-name
+#'   can be provided in "function_name" or "pkg_name::function_name" format.
 #' @param        raw_dir       GHI
 #' @param        raw_files     JKL
 #' @param        raw_archive   MNO
@@ -150,9 +156,23 @@ MicroarrayImportConfig <- function(
                                    gpl_dir         = as.character(NA),
                                    gpl_files       = as.character(NA),
                                    annot_gpl       = as.logical(NA)) {
+  # Ensure that the import-method is defined, and, if specified by name
+  # convert that function name to the equivalent function.
   if (missing(import_method)) {
     stop("import_method should be defined")
   }
+  if(is.character(import_method)) {
+    import_method <- .get_from_env(import_method)
+  }
+  # Ensure that the normalise-method is defined, and, if specified by name
+  # convert that function name to the equivalent function.
+  if (missing(normalise_method)) {
+    stop("normalise_method should be defined")
+  }
+  if (is.character(normalise_method)) {
+    normalise_method <- .get_from_env(normalise_method)
+  }
+
   # Tried to do the following with do.call("new",
   # append(list("MicroarrayImportConfig"), args)) but it threw a C stack
   # problem
