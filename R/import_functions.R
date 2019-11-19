@@ -52,23 +52,26 @@ add_gpl_to_eset <- function(
   gpl_table <- GEOquery::Table(gpl_data)
   stopifnot("ID" %in% colnames(gpl_table))
   if(!all(rownames(eset) %in% gpl_table[["ID"]])) {
-    stop(
-      "IDs in `eset` but not `gpl_table`: ",
+    warning(
+      "IDs in `eset` but not `gpl_data`: ",
       utils::head(setdiff(rownames(eset), gpl_table[["ID"]]))
     )
   }
 
-  annot_ord <- match(rownames(eset), gpl_table[["ID"]])
+  keep_probes <- intersect(rownames(eset), gpl_table[["ID"]])
+  new_eset <- eset[keep_probes, ]
+
+  annot_ord <- match(keep_probes, gpl_table[["ID"]])
 
   fd <- new(
     "AnnotatedDataFrame",
     data = gpl_table[annot_ord, ],
     varMetadata = GEOquery::Columns(gpl_data)
   )
-  rownames(fd) <- rownames(eset)
+  rownames(fd) <- keep_probes
 
-  Biobase::featureData(eset) <- fd
-  eset
+  Biobase::featureData(new_eset) <- fd
+  new_eset
 }
 
 ###############################################################################
