@@ -49,8 +49,16 @@ add_gpl_to_eset <- function(
   stopifnot(methods::is(eset, "ExpressionSet"))
   stopifnot(methods::is(gpl_data, "GPL"))
 
+  # ensure the GPL dataset is of the correct format:
+  # - it should have an ID column (corresponding to probe IDs)
+  # - and that column should have the same type as the rownames of the
+  # ExpressionSet (ie, it should contain strings)
   gpl_table <- GEOquery::Table(gpl_data)
   stopifnot("ID" %in% colnames(gpl_table))
+  if (! is.character(gpl_table[["ID"]])) {
+    gpl_table[["ID"]] <- as.character(gpl_table[["ID"]])
+  }
+
   if(!all(rownames(eset) %in% gpl_table[["ID"]])) {
     warning(
       "IDs in `eset` but not `gpl_data`: ",

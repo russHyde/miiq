@@ -106,4 +106,57 @@ test_that("add_gpl_to_eset: valid inputs", {
   )
 })
 
+test_that("add_gpl_to_eset: numeric IDs", {
+  # A bug was revealed when putting GPL data into an ExpressionSet where the
+  # probe IDs (the rownames of the ESet and the ID column of the GPL) were
+  # all integers.
+  #
+  # - When importing the GPL, the IDs were assumed to be numeric
+  # - The rownames of the ESet were characters
+  # - Taking the intersection of the ESet rownames with the GPL IDs gave
+  # a non-empty numeric vector
+  # - This occurred because in R: intersect("987654", 987654) == 987654
+  # - But then we used the intersection to subset the rows of the Eset;
+  # - any integer in that intersection is likely to come from a different
+  # numeric row in the ESet than it's value sugggests
+
+  eset_numchar_rows <- Biobase::ExpressionSet(
+    matrix(
+      1:6,
+      nrow = 3,
+      dimnames = list(
+        c("10", "1", "987654"),
+        paste0("S", 1:2)
+      )
+    )
+  )
+
+  gpl_numeric_ids <- new(
+    "GPL",
+    header = list(),
+    dataTable = new(
+      "GEODataTable",
+      table = .df(
+        ID = c(1, 10, 100, 987654),
+        annot = c("w", "x", "y", "z")
+      ),
+      columns = .df(
+        Column = c("ID", "annot"),
+        Description = c("Unique identifier for the probe", "Some annotation")
+      )
+    )
+  )
+
+  # Note that
+  # - intersect(c("10", "1", "987654"), c(1, 10, 100, 987654)) == c(10, 1, 987654)
+  # - ie, it is numeric, but ordered as it's first argument
+  # - and there is no 10th (or 987654th) row in the `ExpressionSet`
+
+  expect_equal(
+    rownames(add_gpl_to_eset(eset_numchar_rows, gpl_numeric_ids)),
+    c("10", "1", "987654"),
+    info = "add_gpl_to_eset should handle gpl datasets with numeric ID columns"
+  )
+})
+
 ###############################################################################
