@@ -356,13 +356,11 @@ gld_fnBuilder_exptDesign <- function(
     sn <- Biobase::sampleNames(gset)
     cn <- make.names(colnames(design))
 
-    if (
-      length(sn) != nrow(design) ||
-        length(cn) != ncol(design)
-    ) {
-      message(c("colnames: ", paste(cn, collapse = " ")))
-      message(c("sampleNames: ", paste(sn, collapse = " ")))
-      stop("length of colNames/sampleNames and design size do not agree")
+    if (length(sn) != nrow(design)) {
+      message(c("sampleNames (ExpressionSet): ", paste(sn, collapse = " ")))
+      message(c("sampleNames (design): ", paste(rownames(design), collapse = " ")))
+      print(design)
+      stop("length of sampleNames (in eset) and design do not agree")
     }
 
     rownames(design) <- sn
