@@ -148,7 +148,9 @@ test_that("add_gpl_to_eset: numeric IDs", {
   )
 
   # Note that
-  # - intersect(c("10", "1", "987654"), c(1, 10, 100, 987654)) == c(10, 1, 987654)
+  # - intersect(
+  #     c("10", "1", "987654"), c(1, 10, 100, 987654)
+  #   ) == c(10, 1, 987654)
   # - ie, it is numeric, but ordered as it's first argument
   # - and there is no 10th (or 987654th) row in the `ExpressionSet`
 

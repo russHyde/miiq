@@ -4,15 +4,15 @@
 \alias{gld_fnDefault_esetAnnotation}
 \title{Default function for annotating the ExpressionSet with additional info}
 \usage{
-gld_fnDefault_esetAnnotation(geo.limma.dataset = NULL, gset = NULL,
-  entrezgene.db.id = NULL)
+gld_fnDefault_esetAnnotation(geo_limma_dataset = NULL, gset = NULL,
+  entrezgene_db = NULL)
 }
 \arguments{
-\item{geo.limma.dataset}{A geo_limma_dataset.}
+\item{geo_limma_dataset}{A geo_limma_dataset.}
 
 \item{gset}{An ExpressionSet.}
 
-\item{entrezgene.db.id}{The id for the AnnotationDBI for use in
+\item{entrezgene_db}{The AnnotationDBI (or it's name) for use in
 mapping to entrez ids.}
 }
 \description{

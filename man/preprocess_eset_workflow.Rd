@@ -7,31 +7,31 @@
   normalised and median-normalised. Probes that do not map to entrez.id are
   dropped by default. All annotation / filtering functions can be overridden}
 \usage{
-preprocess_eset_workflow(gset = NULL, entrezgene.db.id = NULL,
-  eset.annot.fn = gld_fnDefault_esetAnnotation,
-  keep.sample.fn = gld_fnDefault_keepSample,
-  transform.and.filter.fn = gld_fnDefault_transformAndProbeFilter,
-  keep.probe.fn = gld_fnDefault_keepProbe)
+preprocess_eset_workflow(gset = NULL, entrezgene_db = NULL,
+  eset_annot_fn = gld_fnDefault_esetAnnotation,
+  keep_sample_fn = gld_fnDefault_keepSample,
+  transform_and_filter_fn = gld_fnDefault_transformAndProbeFilter,
+  keep_probe_fn = gld_fnDefault_keepProbe)
 }
 \arguments{
-\item{gset}{An ExpressionSet (must have genbank
-ids or swissprot ids or similar for default annotation function).}
+\item{gset}{An ExpressionSet (must have genbank ids or
+swissprot ids or similar for default annotation function).}
 
-\item{entrezgene.db.id}{character - Indicates which
-AnnotationDbi object to use in the esetAnnotation function.}
+\item{entrezgene_db}{character or \code{OrgDb}. Which
+\code{AnnotationDbi} object to use in the eset annotation function.}
 
-\item{eset.annot.fn}{Function that annotates an input
-ExpressionSet and outputs an ExpressionSet.}
+\item{eset_annot_fn}{Function that annotates an input ExpressionSet
+and outputs an ExpressionSet.}
 
-\item{keep.sample.fn}{Function that returns integer
-indices of samples (cols) of the ExpressionSet that are to be kept.}
+\item{keep_sample_fn}{Function that returns integer indices of
+samples (cols) of the ExpressionSet that are to be kept.}
 
-\item{transform.and.filter.fn}{Function that applies various
+\item{transform_and_filter_fn}{Function that applies various
 filtering / transformation steps to the values in the input ExpressionSet
 and returns an ExpressionSet}
 
-\item{keep.probe.fn}{Function that returns integer
-indices of probes (rows) of the ExpressionSet that are to be kept.}
+\item{keep_probe_fn}{Function that returns integer indices of
+probes (rows) of the ExpressionSet that are to be kept.}
 }
 \value{
 An ExpressionSet
