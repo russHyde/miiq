@@ -357,8 +357,12 @@ gld_fnBuilder_exptDesign <- function(
     cn <- make.names(colnames(design))
 
     if (length(sn) != nrow(design)) {
-      message(c("sampleNames (ExpressionSet): ", paste(sn, collapse = " ")))
-      message(c("sampleNames (design): ", paste(rownames(design), collapse = " ")))
+      message(
+        c("sampleNames (ExpressionSet): ", paste(sn, collapse = " "))
+      )
+      message(
+        c("sampleNames (design): ", paste(rownames(design), collapse = " "))
+      )
       print(design)
       stop("length of sampleNames (in eset) and design do not agree")
     }
