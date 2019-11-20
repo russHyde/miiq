@@ -401,44 +401,37 @@ gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
 #' Not sure how to import entrezgene database (entrezgene.db.id) by name
 #'   when using \<AT\>import annotations.
 #'
-#' @param        geo.limma.dataset   A geo_limma_dataset.
+#' @param        geo_limma_dataset   A geo_limma_dataset.
 #' @param        gset          An ExpressionSet.
-#' @param        entrezgene.db.id   The id for the AnnotationDBI for use in
+#' @param        entrezgene_db   The AnnotationDBI (or it's name) for use in
 #'   mapping to entrez ids.
 #'
 #' @importClassesFrom   AnnotationDbi   OrgDb
 #'
 gld_fnDefault_esetAnnotation <- function(
-  # nolint start
-  geo.limma.dataset = NULL,
+  geo_limma_dataset = NULL,
   gset = NULL,
-  entrezgene.db.id = NULL
-  # nolint end
+  entrezgene_db = NULL
 ) {
-  # nolint start
-  geo_limma_dataset <- geo.limma.dataset
-  entrezgene_db_id <- entrezgene.db.id
-  # nolint end
-
-  # Function can either use geo_limma_datasets or
-  #   a combination of ExpressionSet and AnnotationDBI id
+  # Function can either use geo_limma_datasets or a combination of
+  # ExpressionSet and an AnnotationDBI
   gset <- .check_or_get_eset(geo_limma_dataset, gset)
 
-  if (!is(entrezgene_db_id, "OrgDb")
+  if (!is(entrezgene_db, "OrgDb")
       &&
-      !is.character(entrezgene_db_id)
+      !is.character(entrezgene_db)
   ) {
     stopifnot(is(geo_limma_dataset, "geo_limma_dataset"))
-    entrezgene_db_id <- geo_limma_dataset@geo.config@entrezgene.db.id
+    entrezgene_db <- geo_limma_dataset@geo.config@entrezgene.db.id
   }
 
-  # entrezgene.db.id is checked by symbol_to_entrez_id, so checking it"s
+  # entrezgene_db is checked by symbol_to_entrez_id, so checking it"s
   #   validity is unnecessary
 
   # Function to annotate an ExpressionSet with entrez.ids
   eset <- add_entrez_ids_to_esets(
     gset,
-    entrezgene.db = entrezgene_db_id
+    entrezgene.db = entrezgene_db
   )
 
   return(eset)
@@ -499,19 +492,19 @@ gld_fnDefault_transformAndProbeFilter <- function(
 #'   normalised and median-normalised. Probes that do not map to entrez.id are
 #'   dropped by default. All annotation / filtering functions can be overridden
 #'
-#' @param        gset          An ExpressionSet (must have genbank
-#'   ids or swissprot ids or similar for default annotation function).
-#' @param        entrezgene.db.id   character - Indicates which
-#'   AnnotationDbi object to use in the esetAnnotation function.
-#' @param        eset.annot.fn   Function that annotates an input
-#'   ExpressionSet and outputs an ExpressionSet.
-#' @param        keep.sample.fn   Function that returns integer
-#'   indices of samples (cols) of the ExpressionSet that are to be kept.
-#' @param        transform.and.filter.fn   Function that applies various
+#' @param        gset          An ExpressionSet (must have genbank ids or
+#'   swissprot ids or similar for default annotation function).
+#' @param        entrezgene_db   character or \code{OrgDb}. Which
+#'   \code{AnnotationDbi} object to use in the eset annotation function.
+#' @param        eset_annot_fn   Function that annotates an input ExpressionSet
+#'   and outputs an ExpressionSet.
+#' @param        keep_sample_fn   Function that returns integer indices of
+#'   samples (cols) of the ExpressionSet that are to be kept.
+#' @param        transform_and_filter_fn   Function that applies various
 #'   filtering / transformation steps to the values in the input ExpressionSet
 #'   and returns an ExpressionSet
-#' @param        keep.probe.fn   Function that returns integer
-#'   indices of probes (rows) of the ExpressionSet that are to be kept.
+#' @param        keep_probe_fn   Function that returns integer indices of
+#'   probes (rows) of the ExpressionSet that are to be kept.
 #'
 #' @return       An ExpressionSet
 #'
@@ -521,33 +514,18 @@ gld_fnDefault_transformAndProbeFilter <- function(
 #' @export
 #'
 preprocess_eset_workflow <- function(
-  # nolint start
   gset = NULL,
-  entrezgene.db.id = NULL,
-  eset.annot.fn =
-    gld_fnDefault_esetAnnotation,
-  keep.sample.fn =
-    gld_fnDefault_keepSample,
-  transform.and.filter.fn =
-    gld_fnDefault_transformAndProbeFilter,
-  keep.probe.fn =
-    gld_fnDefault_keepProbe
-  # nolint end
+  entrezgene_db = NULL,
+  eset_annot_fn = gld_fnDefault_esetAnnotation,
+  keep_sample_fn = gld_fnDefault_keepSample,
+  transform_and_filter_fn = gld_fnDefault_transformAndProbeFilter,
+  keep_probe_fn = gld_fnDefault_keepProbe
 ) {
-  # nolint start
-  # TODO: rename the input arguments to match the lint-free versions below
-  eg_db <- entrezgene.db.id
-  eset_annot_fn <- eset.annot.fn
-  keep_probe_fn <- keep.probe.fn
-  keep_sample_fn <- keep.sample.fn
-  transform_and_filter_fn <- transform.and.filter.fn
-  # nolint end
-
   # validity checks
   stopifnot(is(gset, "ExpressionSet"))
   # the entrezgene.db will be checked in Entrez-annotation functions
-  if (is.null(eg_db)) {
-    stop("No entrezgene.db.id provided in preprocess_eset_workflow")
+  if (is.null(entrezgene_db)) {
+    stop("No `entrezgene_db` provided in `preprocess_eset_workflow`")
   }
 
   lambda_sample_filter <- function(gset) {
@@ -560,9 +538,10 @@ preprocess_eset_workflow <- function(
     gset[keep_probes, ]
   }
   # eset annotation
+  #
   annotated_eset <- eset_annot_fn(
     gset = gset,
-    entrezgene.db.id = eg_db
+    entrezgene_db = entrezgene_db
   )
 
   # sample filtering
