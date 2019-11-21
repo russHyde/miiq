@@ -50,3 +50,4 @@ Collate:
     'vector_manipulation.R'
     'microarray_functions.R'
     'normalisation_functions.R'
+    'preprocess_classes.R'
