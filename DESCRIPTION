@@ -15,7 +15,8 @@ BugReports: https://github.com/russHyde/miiq/issues
 Suggests:
     testthat (>= 2.1.0),
     covr,
-    mockery
+    mockery,
+    withr
 Imports:
     Biobase,
     limma,
@@ -48,3 +49,4 @@ Collate:
     'microarray_classes.R'
     'vector_manipulation.R'
     'microarray_functions.R'
+    'normalisation_functions.R'
