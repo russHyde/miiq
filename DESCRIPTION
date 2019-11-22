@@ -53,3 +53,5 @@ Collate:
     'microarray_functions.R'
     'normalisation_functions.R'
     'preprocess_classes.R'
+    'preprocess_functions.R'
+    'preprocess_methods.R'

@@ -27,21 +27,6 @@ methods::setMethod(
   }
 )
 
-#  #' Generic for the method 'run_preprocess_workflow'
-#  #'
-#  #' @docType      methods
-#  #' @name         run_preprocess_workflow
-#  #' @rdname       run_preprocess_workflow-methods
-#  #' @export
-#  #'
-#  methods::setGeneric(
-#    "run_preprocess_workflow",
-#    function(eset, config) {
-#      standardGeneric("run_preprocess_workflow")
-#    }
-#  )
-
-
 #' Sets up a class for storing the options for preprocessing ExpressionSets
 #' (that is, filtering the samples and probes; adding entrez and symbol columns)
 #'
