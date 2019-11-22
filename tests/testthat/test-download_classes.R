@@ -126,7 +126,8 @@ test_that("MicroarrayDownloadConfig: validation", {
       dest_dir = tempdir(), gpl_acc = "GPL987", annot_gpl = TRUE
     ),
     info = "args to the function refered by download_method should take 'acc'
-and 'dest_dir' as first two args."
+and 'dest_dir' as first two args.",
+    regexp = "`acc` and `dest_dir` should be the first args to `dl_method`"
   )
 })
 
