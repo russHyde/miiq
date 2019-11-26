@@ -114,16 +114,11 @@ MicroarrayImportConfig <- function(
   if (missing(import_method)) {
     stop("import_method should be defined")
   }
-  if(is.character(import_method)) {
-    import_method <- .get_from_env(import_method)
-  }
+
   # Ensure that the normalise-method is defined, and, if specified by name
   # convert that function name to the equivalent function.
   if (missing(normalise_method)) {
     stop("normalise_method should be defined")
-  }
-  if (is.character(normalise_method)) {
-    normalise_method <- .get_from_env(normalise_method)
   }
 
   # Tried to do the following with do.call("new",
@@ -131,9 +126,10 @@ MicroarrayImportConfig <- function(
   # problem
   new(
     "MicroarrayImportConfig",
-    acc = acc, import_method = import_method,
-    normalise_method = normalise_method, raw_dir = raw_dir,
-    raw_files = raw_files, raw_archive = raw_archive,
+    acc = acc,
+    import_method = .get_from_env(import_method),
+    normalise_method = .get_from_env(normalise_method),
+    raw_dir = raw_dir, raw_files = raw_files, raw_archive = raw_archive,
     processed_dir = processed_dir, processed_files = processed_files,
     processed_archive = processed_archive,
     sdrf = sdrf, idf = idf, adf = adf, gpl_dir = gpl_dir,
