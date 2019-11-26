@@ -16,7 +16,33 @@ test_that("MicroarrayPreprocessConfig", {
     info = "MicroarrayPreprocessConfig() constructor returns the correct class"
   )
 
-  # TODO:
-  # user can pass the name of an OrgDb instead of an actual OrgDb, and the
-  # constructor will get pass the correct database to MicroarrayPreprocessConfig
+  expect_equal(
+    MicroarrayPreprocessConfig(
+      "GSE12345", mock_db, keep_sample_fn = "identity"
+    )@keep_sample_fn,
+    expected = identity,
+    info = paste(
+      "`MicroarrayPreprocessConfig()` can take a `keep_sample_fn` as a string"
+    )
+  )
+
+  expect_equal(
+    MicroarrayPreprocessConfig(
+      "GSE12345", mock_db, keep_probe_fn = "identity"
+    )@keep_probe_fn,
+    expected = identity,
+    info = paste(
+      "`MicroarrayPreprocessConfig()` can take a `keep_probe_fn` as a string"
+    )
+  )
+
+  expect_equal(
+    MicroarrayPreprocessConfig(
+      "GSE12345", "org.Hs.eg.db::org.Hs.eg.db"
+    )@entrezgene_db,
+    expected = org.Hs.eg.db::org.Hs.eg.db,
+    info = paste(
+      "`MicroarrayPreprocessConfig()` can take an `entrezgene_db` as a string"
+    )
+  )
 })

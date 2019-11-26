@@ -16,7 +16,8 @@ Suggests:
     testthat (>= 2.1.0),
     covr,
     mockery,
-    withr
+    withr,
+    org.Hs.eg.db
 Imports:
     Biobase,
     limma,
