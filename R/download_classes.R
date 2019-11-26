@@ -115,7 +115,6 @@ methods::setClass(
     dest_dir = "character",
     gpl_acc = "character",
     annot_gpl = "logical"
-    # TODO: raw_files, raw_archive, processed_files, samples_file
   )
 )
 
