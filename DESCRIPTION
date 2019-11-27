@@ -44,7 +44,7 @@ Collate:
     'download_functions.R'
     'download_classes.R'
     'download_methods.R'
-    'gld.R'
+    'filter_functions.R'
     'id_mapping.R'
     'import_classes.R'
     'import_functions.R'
