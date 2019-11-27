@@ -178,132 +178,6 @@ methods::setMethod(
   }
 )
 
-
-###############################################################################
-
-#' If no geo_limma_dataset is provided, or the provided one has no eset,
-#' returns the gset
-#'
-#' Checks that the gset is an ExpressionSet
-#'
-#' @importFrom   methods       is
-#'
-#' @importClassesFrom   Biobase   ExpressionSet
-#'
-#' @noRd
-#'
-
-.check_or_get_eset <- function(
-                               geo_limma_dataset = NULL,
-                               gset = NULL) {
-  if (is.null(gset)) {
-    stopifnot(methods::is(geo_limma_dataset, "eset_limma_dataset"))
-    gset <- geo_limma_dataset@eset
-  }
-  stopifnot(methods::is(gset, "ExpressionSet"))
-  gset
-}
-
-###############################################################################
-
-## #' @import       GEOquery
-## #' @import       Biobase
-## #' @import       limma
-
-###############################################################################
-
-#' Builds a function that returns the col indices of the desired samples
-#'
-#' Creates a function that can be applied to a geo-limma-dataset
-#'   or to an ExpressionSet, and returns the column indices of those
-#'   samples that are to kept
-#' This just reduces the boilerplate involved in checking g-l-d or
-#'   ExpressionSet nature of the input
-#'
-#' @param        column.filter.fn   Function that decides which samples to keep
-#'
-#' @export
-#'
-
-gld_fnBuilder_keepSample <- function(
-                                     # nolint start
-                                     column.filter.fn
-                                     # nolint end
-) {
-  # nolint start
-  stopifnot(is.function(column.filter.fn))
-  fn <- column.filter.fn
-  # nolint end
-
-  function(
-             # nolint start
-             geo.limma.dataset = NULL,
-             # nolint end
-             gset = NULL) {
-    # nolint start
-    gld <- geo.limma.dataset
-    # nolint end
-    gset <- .check_or_get_eset(gld, gset)
-    keep_cols <- fn(gset)
-    keep_cols
-  }
-}
-
-###############################################################################
-
-#' Default function for choosing which samples to keep in a ESet / g-l-d
-#'
-#' @param        geo.limma.dataset   An eset_limma_dataset.
-#' @param        gset          An ExpressionSet - used preferentially
-#'   over ELD@eset.
-#'
-#' @importFrom   Biobase       sampleNames
-#'
-#' @export
-#'
-
-gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
-  # keep all samples
-  # crash if no samples exist
-  column.filter.fn = function(gset) {
-    sn <- Biobase::sampleNames(gset)
-    stopifnot(length(sn) > 0)
-    seq_along(sn)
-  }
-)
-
-###############################################################################
-
-#' Default function for choosing which probes to keep in an ESet / g-l-d
-#'
-#' @param        geo.limma.dataset   A geo_limma_dataset
-#' @param        gset          An ExpressionSet
-#'
-#' @importFrom   Biobase       featureNames
-#'
-#' @export
-#'
-
-gld_fnDefault_keepProbe <- function(
-                                    # nolint start
-                                    geo.limma.dataset = NULL,
-                                    # nolint end
-                                    gset = NULL) {
-  # nolint start
-  # TODO: replace argnames with the lint-passing `geo_limma_dataset`
-  geo_limma_dataset <- geo.limma.dataset
-  # nolint end
-
-  gset <- .check_or_get_eset(geo_limma_dataset, gset)
-
-  features <- Biobase::featureNames(gset)
-
-  stopifnot(length(features) > 0)
-
-  keep_rows <- seq_along(features)
-  return(keep_rows)
-}
-
 ###############################################################################
 
 #' Builds a function that makes the design matrix for a dataset
@@ -320,6 +194,7 @@ gld_fnDefault_keepProbe <- function(
 #'
 #' @importFrom   Biobase       pData   sampleNames
 #'
+#' @include      utils.R
 #' @export
 #'
 
@@ -411,6 +286,7 @@ gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
 #'   mapping to entrez ids.
 #'
 #' @importClassesFrom   AnnotationDbi   OrgDb
+#' @include      utils.R
 #'
 gld_fnDefault_esetAnnotation <- function(
   geo_limma_dataset = NULL,
@@ -451,6 +327,7 @@ gld_fnDefault_esetAnnotation <- function(
 #' @param        gset          An ExpressionSet - used preferentially to
 #'   GLD@eset.
 #'
+#' @include      utils.R
 #' @return       An ExpressionSet
 #'
 
@@ -515,15 +392,16 @@ gld_fnDefault_transformAndProbeFilter <- function(
 #' @importFrom   magrittr      %>%
 #' @importClassesFrom   Biobase   ExpressionSet
 #'
+#' @include   filter_functions.R
 #' @export
 #'
 preprocess_eset_workflow <- function(
   gset = NULL,
   entrezgene_db = NULL,
   eset_annot_fn = gld_fnDefault_esetAnnotation,
-  keep_sample_fn = gld_fnDefault_keepSample,
+  keep_sample_fn = keep_all_samples,
   transform_and_filter_fn = gld_fnDefault_transformAndProbeFilter,
-  keep_probe_fn = gld_fnDefault_keepProbe
+  keep_probe_fn = keep_all_probes
 ) {
   # validity checks
   stopifnot(is(gset, "ExpressionSet"))
