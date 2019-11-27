@@ -9,9 +9,9 @@
 \usage{
 preprocess_eset_workflow(gset = NULL, entrezgene_db = NULL,
   eset_annot_fn = gld_fnDefault_esetAnnotation,
-  keep_sample_fn = gld_fnDefault_keepSample,
+  keep_sample_fn = keep_all_samples,
   transform_and_filter_fn = gld_fnDefault_transformAndProbeFilter,
-  keep_probe_fn = gld_fnDefault_keepProbe)
+  keep_probe_fn = keep_all_probes)
 }
 \arguments{
 \item{gset}{An ExpressionSet (must have genbank ids or

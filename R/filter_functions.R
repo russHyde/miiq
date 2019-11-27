@@ -39,32 +39,3 @@ keep_all_samples <- function(gset) {
 }
 
 ###############################################################################
-
-#' Function for filtering on microarray probes
-#'
-#' @param        geo.limma.dataset   An eset.limma.dataset
-#' @param        gset          An ExpressionSet (overrides use of
-#'   geo.limma.dataset)
-#'
-#' @export
-#'
-keep_probe_fn <- function(
-  # nolint start
-                          geo.limma.dataset = NULL,
-                          # nolint end
-                          gset = NULL) {
-  warning("`keep_probe_fn` is deprecated, please use `keep_all_entrez_probes`")
-
-  # TODO: rewrite to use `geo_limma_dataset` as argname
-
-  # nolint start
-  geo_limma_dataset <- geo.limma.dataset
-  # nolint end
-
-  if (is.null(gset)) {
-    stopifnot(is(geo_limma_dataset, "eset_limma_dataset"))
-    gset <- geo_limma_dataset@eset
-  }
-
-  keep_all_entrez_probes(gset)
-}

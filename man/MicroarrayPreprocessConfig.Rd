@@ -7,8 +7,8 @@
 columns)}
 \usage{
 MicroarrayPreprocessConfig(acc, entrezgene_db,
-  keep_sample_fn = gld_fnDefault_keepSample,
-  keep_probe_fn = gld_fnDefault_keepProbe, annot_gpl = as.logical(NA))
+  keep_sample_fn = keep_all_samples, keep_probe_fn = keep_all_probes,
+  annot_gpl = as.logical(NA))
 }
 \arguments{
 \item{acc}{An identifier for the microarray dataset.

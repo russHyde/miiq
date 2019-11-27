@@ -43,13 +43,14 @@ methods::setMethod(
 #'   function literal or a "function_name" or a "pkg_name::function_name"
 #'   string.
 #'
+#' @include   filter_functions.R   utils.R
 #' @export
 #'
 MicroarrayPreprocessConfig <- function(
                                    acc,
                                    entrezgene_db,
-                                   keep_sample_fn = gld_fnDefault_keepSample,
-                                   keep_probe_fn = gld_fnDefault_keepProbe,
+                                   keep_sample_fn = keep_all_samples,
+                                   keep_probe_fn = keep_all_probes,
                                    annot_gpl = as.logical(NA)) {
   new(
     "MicroarrayPreprocessConfig",
