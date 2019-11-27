@@ -219,17 +219,19 @@ of fits.init"
 
 
 ###############################################################################
-test_that("Default keep.sample.fn - keep all samples; die if no samples", {
+test_that("Default keep_sample_fn - keep all samples; die if no samples", {
+  # TODO: remove these since they duplicate tests in `test-filter_functions.R`
+  # or replace them with a test on `run_preprocess_workflow`
   expect_error(
-    object = gld_fnDefault_keepSample(gset = eset_empty),
+    object = keep_all_samples(gset = eset_empty),
     info = "Default keep.sample.fn should crash on an empty eset"
   )
 
   eset_1x1 <- Biobase::ExpressionSet(assayData = matrix(1))
   expect_equal(
-    object = gld_fnDefault_keepSample(gset = eset_1x1),
+    object = keep_all_samples(gset = eset_1x1),
     expected = c(1),
-    info = "Default keep.sample.fn should keep all cols of a non-empty eset"
+    info = "Default keep_sample_fn should keep all cols of a non-empty eset"
   )
 })
 
@@ -280,13 +282,16 @@ in pData"
 ###############################################################################
 
 test_that("Default keepProbe function", {
+  # TODO: remove these tests since they duplicate tests in
+  # "test-filter_functions.R"; or replace them with a test on
+  # `run_preprocess_workflow`
   expect_error(
-    object = gld_fnDefault_keepProbe(gset = eset_empty),
+    object = keep_all_probes(gset = eset_empty),
     info = "Default keepProbe function: crash if there are no probes"
   )
 
   expect_equal(
-    object = gld_fnDefault_keepProbe(gset = eset_1x2),
+    object = keep_all_probes(gset = eset_1x2),
     expected = 1,
     info = "Default keepProbe function: keep all probes"
   )
