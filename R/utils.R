@@ -1,3 +1,5 @@
+###############################################################################
+
 #' Obtain an object from a specific package based on a string
 #'
 #' Suppose you provide x = "abc::def", then this will return the `def` function
@@ -26,3 +28,30 @@
     getExportedValue(env_fn[1], env_fn[2])
   }
 }
+
+###############################################################################
+
+#' If no geo_limma_dataset is provided, or the provided one has no eset,
+#' returns the gset
+#'
+#' Checks that the gset is an ExpressionSet
+#'
+#' @importFrom   methods       is
+#'
+#' @importClassesFrom   Biobase   ExpressionSet
+#'
+#' @noRd
+#'
+
+.check_or_get_eset <- function(
+                               geo_limma_dataset = NULL,
+                               gset = NULL) {
+  if (is.null(gset)) {
+    stopifnot(methods::is(geo_limma_dataset, "eset_limma_dataset"))
+    gset <- geo_limma_dataset@eset
+  }
+  stopifnot(methods::is(gset, "ExpressionSet"))
+  gset
+}
+
+###############################################################################

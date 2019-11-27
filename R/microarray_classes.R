@@ -179,30 +179,6 @@ methods::setMethod(
 )
 
 
-###############################################################################
-
-#' If no geo_limma_dataset is provided, or the provided one has no eset,
-#' returns the gset
-#'
-#' Checks that the gset is an ExpressionSet
-#'
-#' @importFrom   methods       is
-#'
-#' @importClassesFrom   Biobase   ExpressionSet
-#'
-#' @noRd
-#'
-
-.check_or_get_eset <- function(
-                               geo_limma_dataset = NULL,
-                               gset = NULL) {
-  if (is.null(gset)) {
-    stopifnot(methods::is(geo_limma_dataset, "eset_limma_dataset"))
-    gset <- geo_limma_dataset@eset
-  }
-  stopifnot(methods::is(gset, "ExpressionSet"))
-  gset
-}
 
 ###############################################################################
 
@@ -222,6 +198,7 @@ methods::setMethod(
 #'
 #' @param        column.filter.fn   Function that decides which samples to keep
 #'
+#' @include      utils.R
 #' @export
 #'
 
@@ -240,6 +217,7 @@ gld_fnBuilder_keepSample <- function(
              geo.limma.dataset = NULL,
              # nolint end
              gset = NULL) {
+    warning("deprecation warning: recommend using a function(gset)")
     # nolint start
     gld <- geo.limma.dataset
     # nolint end
@@ -281,6 +259,7 @@ gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
 #'
 #' @importFrom   Biobase       featureNames
 #'
+#' @include      utils.R
 #' @export
 #'
 
@@ -320,6 +299,7 @@ gld_fnDefault_keepProbe <- function(
 #'
 #' @importFrom   Biobase       pData   sampleNames
 #'
+#' @include      utils.R
 #' @export
 #'
 
@@ -411,6 +391,7 @@ gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
 #'   mapping to entrez ids.
 #'
 #' @importClassesFrom   AnnotationDbi   OrgDb
+#' @include      utils.R
 #'
 gld_fnDefault_esetAnnotation <- function(
   geo_limma_dataset = NULL,
@@ -451,6 +432,7 @@ gld_fnDefault_esetAnnotation <- function(
 #' @param        gset          An ExpressionSet - used preferentially to
 #'   GLD@eset.
 #'
+#' @include      utils.R
 #' @return       An ExpressionSet
 #'
 
