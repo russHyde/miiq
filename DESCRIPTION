@@ -41,7 +41,6 @@ Imports:
 Collate:
     'filter_functions.R'
     'utils.R'
-    'microarray_classes.R'
     'deprecated.R'
     'list_manipulation.R'
     'download_functions.R'
@@ -51,6 +50,7 @@ Collate:
     'import_classes.R'
     'import_functions.R'
     'import_methods.R'
+    'microarray_classes.R'
     'vector_manipulation.R'
     'microarray_functions.R'
     'normalisation_functions.R'

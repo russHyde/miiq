@@ -178,55 +178,6 @@ methods::setMethod(
   }
 )
 
-
-
-###############################################################################
-
-## #' @import       GEOquery
-## #' @import       Biobase
-## #' @import       limma
-
-###############################################################################
-
-#' Builds a function that returns the col indices of the desired samples
-#'
-#' Creates a function that can be applied to a geo-limma-dataset
-#'   or to an ExpressionSet, and returns the column indices of those
-#'   samples that are to kept
-#' This just reduces the boilerplate involved in checking g-l-d or
-#'   ExpressionSet nature of the input
-#'
-#' @param        column.filter.fn   Function that decides which samples to keep
-#'
-#' @include      utils.R
-#' @export
-#'
-
-gld_fnBuilder_keepSample <- function(
-                                     # nolint start
-                                     column.filter.fn
-                                     # nolint end
-) {
-  # nolint start
-  stopifnot(is.function(column.filter.fn))
-  fn <- column.filter.fn
-  # nolint end
-
-  function(
-             # nolint start
-             geo.limma.dataset = NULL,
-             # nolint end
-             gset = NULL) {
-    warning("deprecation warning: recommend using a function(gset)")
-    # nolint start
-    gld <- geo.limma.dataset
-    # nolint end
-    gset <- .check_or_get_eset(gld, gset)
-    keep_cols <- fn(gset)
-    keep_cols
-  }
-}
-
 ###############################################################################
 
 #' Builds a function that makes the design matrix for a dataset
