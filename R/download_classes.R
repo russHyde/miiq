@@ -115,7 +115,6 @@ methods::setClass(
     dest_dir = "character",
     gpl_acc = "character",
     annot_gpl = "logical"
-    # TODO: raw_files, raw_archive, processed_files, samples_file
   )
 )
 
@@ -164,15 +163,11 @@ MicroarrayDownloadConfig <- function(
                                      dest_dir = tempdir(),
                                      gpl_acc = as.character(NA),
                                      annot_gpl) {
-  if (is.character(download_method)) {
-    download_method <- .get_from_env(download_method)
-  }
-
   new(
     "MicroarrayDownloadConfig",
     acc = acc,
     database = database,
-    dl_method = download_method,
+    dl_method = .get_from_env(download_method),
     dest_dir = dest_dir,
     gpl_acc = gpl_acc,
     annot_gpl = annot_gpl
