@@ -19,9 +19,7 @@ methods::setClass(
 methods::setMethod(
   f = "initialize",
   signature = methods::signature("MicroarrayPreprocessConfig"),
-  definition = function(
-                        .Object,
-                        ...) {
+  definition = function(.Object, ...) {
     .Object <- methods::callNextMethod()
     .Object
   }
@@ -41,7 +39,8 @@ methods::setMethod(
 #'   of integer indices that can be used to subset an ExpressionSet. By
 #'   default, all samples and features will be kept. Can be specified as a
 #'   function literal or a "function_name" or a "pkg_name::function_name"
-#'   string.
+#'   string. If NULL, the default functions will keep all samples or keep all
+#'   probes.
 #'
 #' @include   filter_functions.R   utils.R
 #' @export
@@ -49,9 +48,16 @@ methods::setMethod(
 MicroarrayPreprocessConfig <- function(
                                    acc,
                                    entrezgene_db,
-                                   keep_sample_fn = keep_all_samples,
-                                   keep_probe_fn = keep_all_probes,
+                                   keep_sample_fn = NULL,
+                                   keep_probe_fn = NULL,
                                    annot_gpl = as.logical(NA)) {
+  if (is.null(keep_sample_fn)) {
+    keep_sample_fn <- keep_all_samples
+  }
+  if (is.null(keep_probe_fn)) {
+    keep_probe_fn <- keep_all_probes
+  }
+
   new(
     "MicroarrayPreprocessConfig",
     acc = acc,

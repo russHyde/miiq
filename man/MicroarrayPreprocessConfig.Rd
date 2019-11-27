@@ -6,9 +6,8 @@
 (that is, filtering the samples and probes; adding entrez and symbol
 columns)}
 \usage{
-MicroarrayPreprocessConfig(acc, entrezgene_db,
-  keep_sample_fn = keep_all_samples, keep_probe_fn = keep_all_probes,
-  annot_gpl = as.logical(NA))
+MicroarrayPreprocessConfig(acc, entrezgene_db, keep_sample_fn = NULL,
+  keep_probe_fn = NULL, annot_gpl = as.logical(NA))
 }
 \arguments{
 \item{acc}{An identifier for the microarray dataset.

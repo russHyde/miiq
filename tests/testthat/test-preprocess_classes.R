@@ -45,4 +45,20 @@ test_that("MicroarrayPreprocessConfig", {
       "`MicroarrayPreprocessConfig()` can take an `entrezgene_db` as a string"
     )
   )
+
+  expect_equal(
+    MicroarrayPreprocessConfig(
+      "GSE12345", mock_db, keep_sample_fn = NULL
+    )@keep_sample_fn,
+    keep_all_samples,
+    info = "if keep_sample_fn is NULL, set it to default (keep_all_samples)"
+  )
+
+  expect_equal(
+    MicroarrayPreprocessConfig(
+      "GSE12345", mock_db, keep_probe_fn = NULL
+    )@keep_probe_fn,
+    keep_all_probes,
+    info = "If keep_probe_fn is NULL, set it to default (keep_all_probes)"
+  )
 })
