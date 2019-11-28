@@ -4,19 +4,6 @@ context("Tests for ExpressionSet filtering functions")
 
 ###############################################################################
 
-# -- Utils for setting up datasets
-
-random_eset <- function(
-    n_probes = sample.int(50, 1),
-    n_samples = sample.int(50, 1)
-) {
-  Biobase::ExpressionSet(
-    matrix(rnorm(n_probes * n_samples), nrow = n_probes, ncol = n_samples)
-  )
-}
-
-###############################################################################
-
 # --- Custom test functions
 
 check_fails_with_non_eset <- function(f_name = "") {

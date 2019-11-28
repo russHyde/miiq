@@ -42,6 +42,7 @@ Collate:
     'filter_functions.R'
     'utils.R'
     'deprecated.R'
+    'diffex_functions.R'
     'list_manipulation.R'
     'download_functions.R'
     'download_classes.R'
