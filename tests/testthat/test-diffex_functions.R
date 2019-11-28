@@ -7,10 +7,10 @@ context("Test functions for differential expression analysis")
 test_that("limma_workflow: invalid input", {
   n_samples <- 4
   eset <- random_eset(n_probes = 50, n_samples = n_samples)
-  design_fn <- function(x) {
+  design_fn <- function(gset) {
     matrix(1, nrow = n_samples, ncol = 1)
   }
-  contrast_fn <- function(x) {
+  contrast_fn <- function(design) {
     matrix(1, nrow = 1, ncol = 1)
   }
 
@@ -58,10 +58,10 @@ test_that("limma_workflow: valid input", {
   # - two limma fits
   n_samples <- 4
   eset <- random_eset(n_probes = 50, n_samples = n_samples)
-  design_fn <- function(x) {
+  design_fn <- function(gset) {
     matrix(1, nrow = n_samples, ncol = 1)
   }
-  contrast_fn <- function(x) {
+  contrast_fn <- function(design) {
     matrix(1, nrow = 1, ncol = 1)
   }
 

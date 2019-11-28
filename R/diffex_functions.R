@@ -49,9 +49,21 @@ limma_workflow <- function(
 
   # Construct design matrix and contrasts matrix using the ExpressionSet /
   #   functions
-  design <- design_fn(gset)
 
-  contrast <- contrast_fn(design)
+  # TODO: fix this; these introduce bugs when used with an unnamed gset (as
+  # first argument) and
+  # gld_fnBuilder_[exptDesign|exptContrasts|exptContrasts_fromList] because,
+  # the latter expect a eset_limma_dataset as the first argument
+  # - Suggest,
+  #    - deprecate gld_fnBuilder_...;
+  #    - add design_builder(treatment_cols, design_fn)(gset)
+  #    - add contrast_builder(contrast_fn)(design)
+  #    - add contrast_builder_from_list(contrast_list)(design)
+  # - That is, rewrite them without any reference to geo_limma_dataset object
+  # in the arg list
+  design <- design_fn(gset = gset)
+
+  contrast <- contrast_fn(design = design)
 
   # Fit coefficients, contrasts and then regularise the contrasts using
   # `limma`
