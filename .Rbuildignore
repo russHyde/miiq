@@ -5,3 +5,4 @@
 ^\.lintr$
 ^\.travis\.yml$
 ^codecov\.yml$
+^random$
