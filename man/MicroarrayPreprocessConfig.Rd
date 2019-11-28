@@ -20,7 +20,8 @@ entrezgene database.}
 of integer indices that can be used to subset an ExpressionSet. By
 default, all samples and features will be kept. Can be specified as a
 function literal or a "function_name" or a "pkg_name::function_name"
-string.}
+string. If NULL, the default functions will keep all samples or keep all
+probes.}
 
 \item{annot_gpl}{Logical. Have the features in the dataset been
 annotated with a GPL?}
