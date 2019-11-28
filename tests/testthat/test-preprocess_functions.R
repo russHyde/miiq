@@ -9,13 +9,12 @@ context("Test preprocess functions")
 }
 
 test_that("we can add an entrez.id and symbol to an ExpressionSet", {
-  eset <- Biobase::ExpressionSet(
-    matrix(1:10, nrow = 5),
-    featureData = Biobase::AnnotatedDataFrame(
-      .df(
-        `Gene ID` = as.character(1:5),
-        `Gene symbol` = c("ABC///DEF", "EEE///EEE", LETTERS[3:5])
-      )
+  eset <- random_eset(
+    n_probes = 5,
+    n_samples = 2,
+    features = .df(
+      `Gene ID` = as.character(1:5),
+      `Gene symbol` = c("ABC///DEF", "EEE///EEE", LETTERS[3:5])
     )
   )
 
