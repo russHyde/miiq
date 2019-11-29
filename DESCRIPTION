@@ -39,10 +39,10 @@ Imports:
     oligoClasses,
     utils
 Collate:
-    'filter_functions.R'
     'utils.R'
-    'deprecated.R'
     'diffex_functions.R'
+    'filter_functions.R'
+    'deprecated.R'
     'list_manipulation.R'
     'download_functions.R'
     'download_classes.R'
