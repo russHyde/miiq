@@ -1,3 +1,5 @@
+# nolint start
+
 ###############################################################################
 #' Builds a function that returns the col indices of the desired samples
 #'
@@ -102,5 +104,73 @@ gld_fnDefault_keepProbe <- function(
 
   keep_all_probes(gset)
 }
+
+###############################################################################
+
+#' Builds a function that makes the design matrix for a dataset
+#'
+#' User passes in the column labels of the phenoData that are to be used in
+#'   making the design
+#' And passes in a design.function that converts these columns into the design
+#' The functionBuilder checks for the validity of the input (treatment.cols /
+#'   design.function) and the built function checks the validity of the
+#'   ExpressionSet / geo-limma-dataset that was passed in
+#'
+#' @param        treatment.cols   Which columns of the pData should be kept?
+#' @param        design.fn     Function for making design matrices.
+#'
+#' @importFrom   Biobase       pData   sampleNames
+#'
+#' @include      utils.R   diffex_functions.R
+#' @export
+#'
+
+gld_fnBuilder_exptDesign <- function(
+                                     treatment.cols = NULL,
+                                     design.fn = NULL) {
+  # check type-validity of the treatment.cols and design.fn
+  stopifnot(is.character(treatment.cols) && length(treatment.cols) > 0)
+  stopifnot(is.function(design.fn))
+
+  design_function <- function(
+                                # nolint start
+                                geo.limma.dataset = NULL,
+                                # nolint end
+                                gset = NULL) {
+  warning(
+    "Creating design-makers using `miiq::gld_fnBuilder_exptDesign` is",
+    "deprecated. Please use `miiq::design_builder` instead."
+  )
+    design_builder(
+      treatment_cols = treatment.cols, design_fn = design.fn
+    )(
+      gset = .check_or_get_eset(geo.limma.dataset, gset)
+    )
+  }
+
+  design_function
+}
+
+###############################################################################
+#' Default function for setting up an expt design from the pData of the
+#'   ExpressionSet
+#'
+#' Just takes the "title" column of the pData and uses it as a factor.
+#'
+#' @param        geo.limma.dataset   A geo_limma_dataset.
+#' @param        gset          An ExpressionSet.
+#'
+#' @export
+#'
+
+gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
+  treatment.cols = "title",
+  design.fn = function(treatments) {
+    title <- treatments[, 1]
+    model.matrix(~title)
+  }
+)
+
+# nolint end
 
 ###############################################################################
