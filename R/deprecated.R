@@ -128,19 +128,15 @@ gld_fnDefault_keepProbe <- function(
 gld_fnBuilder_exptDesign <- function(
                                      treatment.cols = NULL,
                                      design.fn = NULL) {
-  # check type-validity of the treatment.cols and design.fn
-  stopifnot(is.character(treatment.cols) && length(treatment.cols) > 0)
-  stopifnot(is.function(design.fn))
-
   design_function <- function(
                                 # nolint start
                                 geo.limma.dataset = NULL,
                                 # nolint end
                                 gset = NULL) {
-  warning(
-    "Creating design-makers using `miiq::gld_fnBuilder_exptDesign` is",
-    "deprecated. Please use `miiq::design_builder` instead."
-  )
+    warning(
+      "Creating design-makers using `miiq::gld_fnBuilder_exptDesign` is",
+      "deprecated. Please use `miiq::design_builder` instead."
+    )
     design_builder(
       treatment_cols = treatment.cols, design_fn = design.fn
     )(
