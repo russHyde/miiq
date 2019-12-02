@@ -143,7 +143,6 @@ design_builder <- function(treatment_cols = NULL, design_fn = NULL) {
       message(
         c("sampleNames (design): ", paste(rownames(design), collapse = " "))
       )
-      print(design)
       stop("length of sampleNames (in eset) and design do not agree")
     }
 
@@ -153,4 +152,56 @@ design_builder <- function(treatment_cols = NULL, design_fn = NULL) {
   }
 
   design_function
+}
+
+###############################################################################
+
+#' Builds a function that makes the contrast matrix for a dataset
+#'
+#' Note that for a function-as-input, all this does is wrap that function and
+#' check the dimensions and type of the input design against the output
+#' contrast matrix.
+#'
+#' @param    x    Either a closure or a list of string-based contrast
+#'   definitions. If a closure, this should accept a design matrix and return
+#'   a contrast matrix.
+#'
+#' @return    A function that accepts a design matrix / data.frame and
+#'   constructs a contrasts matrix from it.
+#' @importFrom   limma   makeContrasts
+#' @export
+
+contrast_builder <- function(x) {
+
+  # convert a list of string-defined contrasts into a function
+  f <- if(is.function(x)) {
+    x
+  } else if (is.list(x)) {
+    function(design) {
+      cont_mat <- limma::makeContrasts(
+        contrasts = x,
+        levels = design
+      )
+      if (!is.null(names(x))) {
+        colnames(cont_mat) <- names(x)
+      }
+      cont_mat
+    }
+  }
+
+  contrast_function <- function(design) {
+    stopifnot(
+      (
+        is(design, "data.frame") && is.numeric(as.matrix(design))
+      ) || (
+        is(design, "matrix") && is.numeric(design)
+      )
+    )
+    contrast_matrix <- f(design)
+
+    stopifnot(nrow(contrast_matrix) == ncol(design))
+    contrast_matrix
+  }
+
+  contrast_function
 }
