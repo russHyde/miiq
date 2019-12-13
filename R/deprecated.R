@@ -4,6 +4,32 @@
 # nocov start
 
 ###############################################################################
+
+#' limma workflow: .....
+#'
+#' @param        gset          An ExpressionSet
+#' @param        design_fn   A function that creates a design matrix based on
+#'   gset as input.
+#' @param        contrast_fn   A function that creates a contrasts matrix
+#'   based on an input design matrix.
+#'
+#' @return       A list(design, contrast, fits_init, fits).
+#'
+#' @include      diffex_classes.R   diffex_methods.R
+#' @export
+
+limma_workflow <- function(
+                           gset = NULL,
+                           design_fn = NULL,
+                           contrast_fn = NULL) {
+  message("Deprecated: limma_workflow; use run_diffex_workflow()")
+  run_diffex_workflow(
+    gset, DiffexConfig(design_fn, contrast_fn)
+  )
+}
+
+###############################################################################
+
 #' Builds a function that returns the col indices of the desired samples
 #'
 #' Creates a function that can be applied to a geo-limma-dataset

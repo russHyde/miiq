@@ -5,6 +5,8 @@ context("Test functions for differential expression analysis")
 ###############################################################################
 
 test_that("limma_workflow: invalid input", {
+  # TODO: rewrite these tests to call `run_diffex_workflow` rather than
+  # (deprecated) `limma_workflow`
   n_samples <- 4
   eset <- random_eset(n_probes = 50, n_samples = n_samples)
   design_fn <- function(gset) {
@@ -52,6 +54,9 @@ test_that("limma_workflow: invalid input", {
 })
 
 test_that("limma_workflow: valid input", {
+  # TODO: rewrite these tests to call `run_diffex_workflow` rather than
+  # (deprecated) `limma_workflow`
+
   # contents should include
   # - a design matrix
   # - a contrasts matrix
@@ -65,9 +70,13 @@ test_that("limma_workflow: valid input", {
     matrix(1, nrow = 1, ncol = 1)
   }
 
-  results <- expect_silent(
-    limma_workflow(eset, design_fn, contrast_fn)
-  )
+  # limma_workflow throws a deprecation message so we removed this test
+
+  #results <- expect_silent(
+  #  limma_workflow(eset, design_fn, contrast_fn)
+  #)
+
+  results <- limma_workflow(eset, design_fn, contrast_fn)
   expect_is(
     object = results$design, class = "matrix"
   )
@@ -81,6 +90,8 @@ test_that("limma_workflow: valid input", {
     results$fits, "MArrayLM"
   )
 })
+
+###############################################################################
 
 test_that("`design_builder` creates a function that acts on ExpressionSets", {
   eset <- random_eset(n_samples = 12)
@@ -112,6 +123,8 @@ test_that(
     )
   )
 })
+
+###############################################################################
 
 test_that(
   "fn returned by `contrast_builder` creates correct-sized contrasts", {
@@ -210,3 +223,5 @@ test_that(
     )
   }
 )
+
+###############################################################################
