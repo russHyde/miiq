@@ -42,6 +42,8 @@ Collate:
     'utils.R'
     'diffex_functions.R'
     'filter_functions.R'
+    'diffex_classes.R'
+    'diffex_methods.R'
     'deprecated.R'
     'list_manipulation.R'
     'download_functions.R'
