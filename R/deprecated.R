@@ -1,4 +1,7 @@
+###############################################################################
+
 # nolint start
+# nocov start
 
 ###############################################################################
 #' Builds a function that returns the col indices of the desired samples
@@ -15,18 +18,14 @@
 #' @export
 #'
 
-# nolint start
 gld_fnBuilder_keepSample <- function(
                                      column.filter.fn
-                                     # nolint end
 ) {
   stopifnot(is.function(column.filter.fn))
   fn <- column.filter.fn
 
   function(
-             # nolint start
              geo.limma.dataset = NULL,
-             # nolint end
              gset = NULL) {
     warning("deprecation warning: recommend using a function(gset)")
     gset <- .check_or_get_eset(geo.limma.dataset, gset)
@@ -46,9 +45,7 @@ gld_fnBuilder_keepSample <- function(
 #' @export
 #'
 keep_probe_fn <- function(
-                          # nolint start
                           geo.limma.dataset = NULL,
-                          # nolint end
                           gset = NULL) {
   warning(
     "`miiq::keep_probe_fn` is deprecated, please use",
@@ -72,9 +69,7 @@ keep_probe_fn <- function(
 #' @export
 #'
 
-# nolint start
 gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
-  # nolint end
   column.filter.fn = keep_all_samples
 )
 
@@ -90,10 +85,8 @@ gld_fnDefault_keepSample <- gld_fnBuilder_keepSample(
 #' @export
 #'
 
-# nolint start
 gld_fnDefault_keepProbe <- function(
                                     geo.limma.dataset = NULL,
-                                    # nolint end
                                     gset = NULL) {
   warning(
     "`miiq::gld_fnDefault_keepProbe` is deprecated, please use",
@@ -129,9 +122,7 @@ gld_fnBuilder_exptDesign <- function(
                                      treatment.cols = NULL,
                                      design.fn = NULL) {
   design_function <- function(
-                                # nolint start
                                 geo.limma.dataset = NULL,
-                                # nolint end
                                 gset = NULL) {
     warning(
       "Creating design-makers using `miiq::gld_fnBuilder_exptDesign` is",
@@ -167,6 +158,9 @@ gld_fnDefault_exptDesign <- gld_fnBuilder_exptDesign(
   }
 )
 
+###############################################################################
+
 # nolint end
+# nocov end
 
 ###############################################################################
