@@ -187,8 +187,12 @@ test_that("Row subsetting of eset_limma_dataset using rownames", {
     "MArrayLM",
     list(
       coefficients = matrix(
-        0, nrow = n_probes, ncol = n_coefs,
-        dimnames = list(probe_names, coef_names))))
+        0,
+        nrow = n_probes, ncol = n_coefs,
+        dimnames = list(probe_names, coef_names)
+      )
+    )
+  )
 
   index_vec <- sample(probe_names, sample.int(n_probes, 1))
 

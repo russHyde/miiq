@@ -141,7 +141,7 @@ methods::setMethod(
   definition = function(x) {
     if (nrow(x@eset) > 0) {
       rownames(x@eset)
-    } else if (nrow(x@fits) > 0){
+    } else if (nrow(x@fits) > 0) {
       rownames(x@fits)
     } else {
       rownames(x@fits.init)
