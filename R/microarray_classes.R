@@ -131,16 +131,34 @@ eset_limma_dataset <- function(...) {
 
 # eset_limma_dataset methods:
 
-#' Row-subsetting operator for `eset_limma_dataset` class
+setGeneric("feature_names", function(x) {
+  standardGeneric("feature_names")
+})
+
+methods::setMethod(
+  "feature_names",
+  signature = c(x = "eset_limma_dataset"),
+  definition = function(x) {
+    if (nrow(x@eset) > 0) {
+      rownames(x@eset)
+    } else if (nrow(x@fits) > 0) {
+      rownames(x@fits)
+    } else {
+      rownames(x@fits.init)
+    }
+  }
+)
+
+#' Row-subsetting (feature-subsetting) operator for `eset_limma_dataset` class
 #'
 #' @param        x             An `eset_limma_dataset` object
-#' @param        i             A subset of the rows in `x`
+#' @param        i             A subset of the row numbers in `x` the eset,
+#'   fits or fits.init of x (that is, a subset of the features in x)
 #' @param        j,drop,...    Not used
 #'
 #' @name         [
 #' @rdname       eset_limma_dataset
 #' @aliases      [,eset_limma_dataset,numeric,missing,missing-method
-#' @export
 #'
 
 methods::setMethod(
@@ -176,6 +194,32 @@ methods::setMethod(
       fits = .fits,
       fits.init = .fits_init
     )
+  }
+)
+
+#' Row-subsetting (feature-subsetting) operator for `eset_limma_dataset` class
+#'
+#' @param        x             An `eset_limma_dataset` object
+#' @param        i             A subset of the feature_names in `x` (the
+#'   rownames of the eset, fits or fits.init entries)
+#' @param        j,drop,...    Not used
+#'
+#' @name         [
+#' @rdname       eset_limma_dataset
+#' @aliases      [,eset_limma_dataset,character,missing,missing-method
+#'
+
+methods::setMethod(
+  "[",
+  signature = c(
+    x = "eset_limma_dataset",
+    i = "character",
+    j = "missing",
+    drop = "missing"
+  ),
+  definition = function(x, i, j, ..., drop) {
+    keep_features <- match(i, feature_names(x))
+    x[keep_features, ]
   }
 )
 
@@ -346,11 +390,8 @@ preprocess_eset_workflow <- function(
 }
 
 # TODO: add tests / classes / functions:
-# - geo_config, geo_limma_dataset, limma_config
+# - geo_config, geo_limma_dataset
 # - decideTests_gld, eset<-,
-# - limma_workflow
-# - gld_fnBuilder_exptContrasts
-# - gld_fnBuilder_exptContrasts_fromList
 
 # TODO:
 # - keep class definitions, setters / getters / subsetters into

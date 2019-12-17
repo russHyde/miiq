@@ -3,14 +3,25 @@
 \name{[}
 \alias{[}
 \alias{[,eset_limma_dataset,numeric,missing,missing-method}
-\title{Row-subsetting operator for `eset_limma_dataset` class}
+\alias{[,eset_limma_dataset,character,missing,missing-method}
+\title{Row-subsetting (feature-subsetting) operator for `eset_limma_dataset` class}
 \arguments{
 \item{x}{An `eset_limma_dataset` object}
 
-\item{i}{A subset of the rows in `x`}
+\item{i}{A subset of the row numbers in `x` the eset,
+fits or fits.init of x (that is, a subset of the features in x)}
+
+\item{j, drop, ...}{Not used}
+
+\item{x}{An `eset_limma_dataset` object}
+
+\item{i}{A subset of the feature_names in `x` (the
+rownames of the eset, fits or fits.init entries)}
 
 \item{j, drop, ...}{Not used}
 }
 \description{
-Row-subsetting operator for `eset_limma_dataset` class
+Row-subsetting (feature-subsetting) operator for `eset_limma_dataset` class
+
+Row-subsetting (feature-subsetting) operator for `eset_limma_dataset` class
 }
