@@ -1,6 +1,6 @@
 ###############################################################################
 
-context("Tests for the functions in rh_microarray_classes.R")
+context("Tests for the functions in microarray_classes.R")
 
 ###############################################################################
 # Expression sets that are used multiple times:
@@ -18,9 +18,6 @@ eset_1x2 <- Biobase::ExpressionSet(
     row.names = c("samp1", "samp2")
   ))
 )
-
-###############################################################################
-
 
 ###############################################################################
 # Test the validity of eset_limma_datasets
@@ -128,13 +125,10 @@ number of rows (probes)"
   #    each gene.
 })
 
-# TODO: test / implement row-subsettting function for eset_limma_dataset
 test_that("Row subsetting of eset_limma_datasets works as expected", {
 
   # Test data: 3 probes, 2 samples, 2 coefficients, 1 contrast
-  eset_3x2 <- Biobase::ExpressionSet(
-    assayData = matrix(nrow = 3, ncol = 2)
-  )
+  eset_3x2 <- random_eset(n_probes = 3, n_samples = 2)
   design_2x2 <- data.frame(single.column = rep(1, 2))
   contrast_2x1 <- matrix(0, nrow = 2, ncol = 1)
   fit_3x2 <- new(
@@ -178,8 +172,47 @@ of fits.init"
   )
 })
 
+###############################################################################
+
+test_that("Row subsetting of eset_limma_dataset using rownames", {
+  n_probes <- 20
+  n_coefs <- 5
+  probe_names <- paste0("P", seq_len(n_probes))
+  coef_names <- paste0("C", seq_len(n_coefs))
+
+  eset <- random_eset(n_probes = n_probes)
+  rownames(eset) <- paste0("P", seq_len(n_probes))
+
+  fit <- new(
+    "MArrayLM",
+    list(
+      coefficients = matrix(
+        0, nrow = n_probes, ncol = n_coefs,
+        dimnames = list(probe_names, coef_names))))
+
+  index_vec <- sample(probe_names, sample.int(n_probes, 1))
+
+  expect_equal(
+    object = eset_limma_dataset(eset = eset)[index_vec, ],
+    expected = eset_limma_dataset(eset = eset[index_vec, ]),
+    info = "Subsetting an ELD that only contains an ESet, by rownames"
+  )
+
+  expect_equal(
+    object = eset_limma_dataset(fits = fit)[index_vec, ],
+    expected = eset_limma_dataset(fits = fit[index_vec, ]),
+    info = "Subsetting an ELD that only contains a fits entry, by rownames"
+  )
+
+  expect_equal(
+    object = eset_limma_dataset(fits.init = fit)[index_vec, ],
+    expected = eset_limma_dataset(fits.init = fit[index_vec, ]),
+    info = "Subsetting an ELD that only contains a fits.init entry, by rowname"
+  )
+})
 
 ###############################################################################
+
 test_that("Default keep_sample_fn - keep all samples; die if no samples", {
   # TODO: remove these since they duplicate tests in `test-filter_functions.R`
   # or replace them with a test on `run_preprocess_workflow`
