@@ -6,9 +6,9 @@
 and/or ArrayExpress}
 \usage{
 MicroarrayImportConfig(acc, import_method, normalise_method,
-  raw_dir = as.character(NA), raw_files = as.character(NA),
-  raw_archive = as.character(NA), processed_dir = as.character(NA),
-  processed_files = as.character(NA),
+  file_list = NULL, raw_dir = as.character(NA),
+  raw_files = as.character(NA), raw_archive = as.character(NA),
+  processed_dir = as.character(NA), processed_files = as.character(NA),
   processed_archive = as.character(NA), sdrf = as.character(NA),
   idf = as.character(NA), adf = as.character(NA),
   gpl_dir = as.character(NA), gpl_files = as.character(NA),
@@ -26,6 +26,10 @@ the calling environment) or "pkg_name::function_name".}
 \item{normalise_method}{Either a function or the name of a function
 to be used for normalising the imported microarray data. The function-name
 can be provided in "function_name" or "pkg_name::function_name" format.}
+
+\item{file_list}{A list (as output by run_download_workflow) that
+defines the file paths for the data to be imported. When specified, none
+of the arguments}
 
 \item{raw_dir}{GHI}
 

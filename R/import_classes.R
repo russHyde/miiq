@@ -78,6 +78,9 @@ methods::setMethod(
 #' @param        normalise_method   Either a function or the name of a function
 #'   to be used for normalising the imported microarray data. The function-name
 #'   can be provided in "function_name" or "pkg_name::function_name" format.
+#' @param        file_list     A list (as output by run_download_workflow) that
+#'   defines the file paths for the data to be imported. When specified, none
+#'   of the arguments
 #' @param        raw_dir       GHI
 #' @param        raw_files     JKL
 #' @param        raw_archive   MNO
@@ -97,18 +100,19 @@ MicroarrayImportConfig <- function(
                                    acc,
                                    import_method,
                                    normalise_method,
-                                   raw_dir         = as.character(NA),
-                                   raw_files       = as.character(NA),
-                                   raw_archive     = as.character(NA),
-                                   processed_dir   = as.character(NA),
+                                   file_list = NULL,
+                                   raw_dir = as.character(NA),
+                                   raw_files = as.character(NA),
+                                   raw_archive = as.character(NA),
+                                   processed_dir = as.character(NA),
                                    processed_files = as.character(NA),
                                    processed_archive = as.character(NA),
-                                   sdrf            = as.character(NA),
-                                   idf             = as.character(NA),
-                                   adf             = as.character(NA),
-                                   gpl_dir         = as.character(NA),
-                                   gpl_files       = as.character(NA),
-                                   annot_gpl       = as.logical(NA)) {
+                                   sdrf = as.character(NA),
+                                   idf = as.character(NA),
+                                   adf = as.character(NA),
+                                   gpl_dir = as.character(NA),
+                                   gpl_files = as.character(NA),
+                                   annot_gpl = as.logical(NA)) {
   # Ensure that the import-method is defined, and, if specified by name
   # convert that function name to the equivalent function.
   if (missing(import_method)) {
@@ -121,20 +125,51 @@ MicroarrayImportConfig <- function(
     stop("normalise_method should be defined")
   }
 
+  .all_download_args_are_na <- all(vapply(
+      list(
+        raw_dir, raw_files, raw_archive,
+        processed_dir, processed_files, processed_archive,
+        sdrf, idf, adf,
+        gpl_dir, gpl_files, annot_gpl
+      ),
+      is.na,
+      logical(1)
+  ))
+
+  if (!is.null(file_list) && !.all_download_args_are_na) {
+    stop(
+      "When file_list is defined, none of the [raw|processed|gpl] file /",
+      " archive / dir args should be defined"
+    )
+  }
+
   # Tried to do the following with do.call("new",
   # append(list("MicroarrayImportConfig"), args)) but it threw a C stack
   # problem
-  new(
-    "MicroarrayImportConfig",
-    acc = acc,
-    import_method = .get_from_env(import_method),
-    normalise_method = .get_from_env(normalise_method),
-    raw_dir = raw_dir, raw_files = raw_files, raw_archive = raw_archive,
-    processed_dir = processed_dir, processed_files = processed_files,
-    processed_archive = processed_archive,
-    sdrf = sdrf, idf = idf, adf = adf, gpl_dir = gpl_dir,
-    gpl_files = gpl_files, annot_gpl = annot_gpl
-  )
+  lambda <- function(...) {
+    new(
+      "MicroarrayImportConfig",
+      acc = acc,
+      import_method = .get_from_env(import_method),
+      normalise_method = .get_from_env(normalise_method),
+      ...
+    )
+  }
+
+  if (!is.null(file_list)) {
+    do.call(lambda, file_list)
+  } else {
+    lambda(
+      raw_dir = raw_dir,
+      raw_files = raw_files,
+      raw_archive = raw_archive,
+      processed_dir = processed_dir,
+      processed_files = processed_files,
+      processed_archive = processed_archive,
+      sdrf = sdrf, idf = idf, adf = adf, gpl_dir = gpl_dir,
+      gpl_files = gpl_files, annot_gpl = annot_gpl
+    )
+  }
 }
 
 #############################################################################

@@ -67,3 +67,52 @@ test_that("MicroarrayImportConfig: constructor", {
 })
 
 ###############################################################################
+
+test_that("user can pass in file_list from run_download_workflow", {
+
+  # typical values for the file_list returned by run_download_workflow for a
+  # raw GEO dataset
+  #
+  geo_acc <- "GSE11578"
+  gpl_acc <- "GPL571"
+  geo_file_list <- list(
+    raw_dir = file.path("~", "ext_data", "GEOquery", "GSE11578"),
+    raw_archive = "GSE11578_RAW.tar",
+    processed_dir = file.path("~", "ext_data", "GEOquery"),
+    processed_files = "GSE11578_series_matrix.txt.gz",
+    gpl_dir = file.path("~", "ext_data", "GEOquery"),
+    gpl_files = "GPL571.annot.gz",
+    annot_gpl = TRUE
+  )
+
+  import_config <- expect_silent(
+    MicroarrayImportConfig(
+      acc = geo_acc,
+      import_method = "import_geo_affy_raw",
+      normalise_method = "normalise_raw_affy_eset",
+      file_list = geo_file_list
+    )
+  )
+
+  expect_equal(import_config@raw_dir, geo_file_list$raw_dir)
+  expect_equal(import_config@raw_archive, geo_file_list$raw_archive)
+  expect_equal(import_config@processed_dir, geo_file_list$processed_dir)
+  expect_equal(import_config@processed_files, geo_file_list$processed_files)
+  expect_equal(import_config@gpl_dir, geo_file_list$gpl_dir)
+  expect_equal(import_config@gpl_files, geo_file_list$gpl_files)
+  expect_equal(import_config@annot_gpl, geo_file_list$annot_gpl)
+
+  expect_error(
+    MicroarrayImportConfig(
+      acc = geo_acc,
+      import_method = "import_geo_affy_raw",
+      normalise_method = "normalise_raw_affy_eset",
+      file_list = geo_file_list,
+      raw_dir = "some_directory"
+    ),
+    info = paste(
+      "when `file_list` is specified, [raw|processed|gpl]_[dir|files|archive]",
+      "and annot_gpl should not be specified"
+    )
+  )
+})
