@@ -140,7 +140,6 @@ eset_limma_dataset <- function(...) {
 #' @name         [
 #' @rdname       eset_limma_dataset
 #' @aliases      [,eset_limma_dataset,numeric,missing,missing-method
-#' @export
 #'
 
 methods::setMethod(
